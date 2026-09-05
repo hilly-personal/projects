@@ -197,6 +197,11 @@ section{margin-bottom:36px}
   font-size:.75rem; letter-spacing:.1em; color:var(--accent); font-weight:700;
   text-transform:uppercase; margin-bottom:14px;
 }
+.new-tenders-badge{
+  display:inline-flex; align-items:center; background:var(--signal-soft); color:var(--signal);
+  font-size:.72rem; font-weight:700; letter-spacing:normal; text-transform:none;
+  padding:3px 10px; border-radius:100px; margin-inline-start:8px; vertical-align:middle;
+}
 .card{
   background:var(--surface); border:1px solid var(--line); border-radius:12px;
   padding:22px 24px; border-inline-start:3px solid var(--signal);

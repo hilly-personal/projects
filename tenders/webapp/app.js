@@ -270,6 +270,26 @@ function daysUntil(iso){
   if (!iso) return null;
   return Math.round((new Date(iso) - TODAY) / 86400000);
 }
+// "New since your last visit" — compares open_tenders.first_seen (already stored per tender)
+// against a remembered last-visit date. Server-side for signed-in users (user_scopes, so the
+// count is consistent across devices), localStorage for anonymous visitors. Both sides use a
+// plain date (not a timestamp), matching first_seen's own granularity — a second visit later
+// the same day won't re-flag that day's batch as new again, which is the intended behavior, not
+// a bug.
+const OPEN_TENDERS_LAST_VISIT_KEY = 'ti_open_tenders_last_visit';
+function loadLastVisitLocal(){ try { return localStorage.getItem(OPEN_TENDERS_LAST_VISIT_KEY); } catch(e){ return null; } }
+function saveLastVisitLocal(iso){ try { localStorage.setItem(OPEN_TENDERS_LAST_VISIT_KEY, iso); } catch(e) {} }
+async function loadServerLastVisit(){
+  if (!session) return null;
+  const { data, error } = await sb.from('user_scopes').select('open_tenders_last_visit').eq('user_id', session.user.id).maybeSingle();
+  if (error || !data) return null;
+  return data.open_tenders_last_visit;
+}
+async function saveServerLastVisit(iso){
+  if (!session) return;
+  await sb.from('user_scopes').upsert({ user_id: session.user.id, open_tenders_last_visit: iso });
+}
+
 function renderOpenTenders(tenders){
   if (!tenders.length){
     return `<div class="opp-empty">לא זיהינו כרגע מכרזים פתוחים בתחום זה. הסריקה מתעדכנת מספר פעמים ביום.</div>`;
@@ -752,6 +772,15 @@ async function renderEmptyState(){
 
   let openTenders; try { openTenders = await fetchOpenTenders(); } catch(e) { openTenders = []; }
   document.getElementById('open-tenders').innerHTML = renderOpenTenders(openTenders);
+  const lastVisit = session ? await loadServerLastVisit() : loadLastVisitLocal();
+  const newSinceLastVisit = lastVisit ? openTenders.filter(t => t.first_seen > lastVisit).length : 0;
+  const newBadge = document.getElementById('new-tenders-badge');
+  if (newBadge){
+    newBadge.hidden = newSinceLastVisit === 0;
+    newBadge.textContent = newSinceLastVisit > 0 ? `🆕 ${newSinceLastVisit} חדשים מאז הביקור האחרון` : '';
+  }
+  const todayIso = TODAY.toISOString().slice(0, 10);
+  if (session) await saveServerLastVisit(todayIso); else saveLastVisitLocal(todayIso);
 
   let allRes; try { allRes = await fetchAll(); } catch(e) { allRes = { mode: 'teaser', data: [] }; }
   document.getElementById('empty-opps').innerHTML = renderOpportunities(allRes.mode, allRes.data, null);
