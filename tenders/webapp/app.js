@@ -12,7 +12,7 @@ function promoDaysLeft(){ return Math.max(0, Math.ceil((PROMO_DEADLINE - TODAY) 
 function promoPrice(regular){ return Math.round(regular * (1 - PROMO_PCT/100) / 10) * 10; }
 const PLANS = [
   { key: 'single', name: 'מנוי קטגוריה בודדת', desc: 'מעקב רציף אחרי הקטגוריה שבחרתם בלבד', regular: 690 },
-  { key: 'multi', name: 'מנוי רב-קטגורי', desc: 'מעקב על פני כל 6 הקטגוריות הזמינות', regular: 1490 },
+  { key: 'multi', name: 'מנוי רב-קטגורי', desc: 'מעקב על פני כל 7 הקטגוריות הזמינות', regular: 1490 },
 ];
 
 const TIERS = [
@@ -24,7 +24,7 @@ function tierOfFull(c){ return TIERS.find(t => t.test(c)); }
 const TIER_LABELS = { leading: 'שחקן מוביל', established: 'שחקן יציב', rising: 'כוח עולה' };
 
 // ---------- onboarding scope: domain / location / deal-size ----------
-// All 6 are real, validated, live domains (see the multi-domain expansion plan) — every one
+// All 7 are real, validated, live domains (see the multi-domain expansion plan) — every one
 // of these is actually queryable in Supabase, not a "coming soon" placeholder.
 const DOMAINS = [
   { key: 'cleaning', label: 'ניקיון' },
@@ -33,6 +33,7 @@ const DOMAINS = [
   { key: 'gardening', label: 'גינון' },
   { key: 'laundry', label: 'כביסה' },
   { key: 'transport', label: 'הסעות' },
+  { key: 'parking', label: 'חניה' },
 ];
 const DISTRICTS = ['ירושלים', 'תל אביב', 'מרכז', 'חיפה', 'צפון', 'דרום', 'יהודה ושומרון'];
 const DEALSIZE_OPTIONS = [

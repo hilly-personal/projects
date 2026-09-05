@@ -24,7 +24,7 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.join(HERE, "..", "..")
 
-VALIDATED_CATEGORIES = ["cleaning", "security", "catering", "gardening", "laundry", "transport"]
+VALIDATED_CATEGORIES = ["cleaning", "security", "catering", "gardening", "laundry", "transport", "parking"]
 
 
 def run(*args, **kwargs):

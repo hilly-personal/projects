@@ -22,7 +22,7 @@ ROOT = os.path.join(HERE, "..", "..")
 OUT = os.path.join(HERE, "..", "name_index.json")
 
 # keep in sync with src/pipeline/refresh_all.py's VALIDATED_CATEGORIES
-VALIDATED_CATEGORIES = ["cleaning", "security", "catering", "gardening", "laundry", "transport"]
+VALIDATED_CATEGORIES = ["cleaning", "security", "catering", "gardening", "laundry", "transport", "parking"]
 
 
 def main():

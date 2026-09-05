@@ -54,20 +54,21 @@ from category_classifier import (  # noqa: E402 (reused, not reinvented)
     GARDENING_KEYWORDS,
     LAUNDRY_KEYWORDS,
     TRANSPORT_KEYWORDS,
+    PARKING_KEYWORDS,
 )
 
 BASE = "https://mr.gov.il/ilgstorefront/he/search/"
 MAX_PAGES_PER_KEYWORD = 15  # politeness/safety bound per keyword — ~20 results/page; the
                             # largest single keyword found so far ("כיבוד") was 166 results (~9 pages)
 REQUEST_DELAY_SECONDS = 0.4
-VALIDATED_CATEGORIES = {"cleaning", "security", "catering", "gardening", "laundry", "transport"}
+VALIDATED_CATEGORIES = {"cleaning", "security", "catering", "gardening", "laundry", "transport", "parking"}
 
 # Every keyword actually searched for, deduplicated across domains (e.g. אבטחה/שמירה both
 # belong to "security" but are separate search terms) — keep this in sync with
 # category_classifier.py's own *_KEYWORDS lists rather than re-deriving a separate list by hand.
 SEARCH_KEYWORDS = sorted(set(
     CLEANING_KEYWORDS + SECURITY_KEYWORDS + CATERING_KEYWORDS
-    + GARDENING_KEYWORDS + LAUNDRY_KEYWORDS + TRANSPORT_KEYWORDS
+    + GARDENING_KEYWORDS + LAUNDRY_KEYWORDS + TRANSPORT_KEYWORDS + PARKING_KEYWORDS
 ))
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; TenderIntelligenceBot/1.0; research use)"}

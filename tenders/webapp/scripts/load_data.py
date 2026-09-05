@@ -29,7 +29,7 @@ BATCH_SIZE = 20
 # found not viable) sits in that same directory and must never get silently loaded just because
 # it matches the filename pattern. Keep this in sync with
 # src/pipeline/refresh_all.py's VALIDATED_CATEGORIES.
-VALIDATED_CATEGORIES = ["cleaning", "security", "catering", "gardening", "laundry", "transport"]
+VALIDATED_CATEGORIES = ["cleaning", "security", "catering", "gardening", "laundry", "transport", "parking"]
 SOURCES = [
     os.path.join(ROOT, "app", "companies.json") if cat == "cleaning"
     else os.path.join(ROOT, "data", "processed", f"companies_{cat}.json")

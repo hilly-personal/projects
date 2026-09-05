@@ -41,6 +41,16 @@ CATERING_KEYWORDS = ["הסעדה", "כיבוד"]  # 368 title matches, precision
 GARDENING_KEYWORDS = ["גינון"]  # 287 title matches, precision-sampled clean (often bundled with cleaning)
 LAUNDRY_KEYWORDS = ["כביסה", "כביסת"]  # 175 title matches, precision-sampled clean
 
+# Parking-lot operators contracted by government bodies for employee/visitor parking. The bare
+# word "חניה" is contaminated by land-use/planning documents ("חניה ציבורית" as one term among
+# many in a development plan) — the full phrase "שירותי חניה" is what's actually clean: 1,557
+# title matches, 264 distinct supplier companies, 25/25 precision on a random sample (2026-09-05).
+# Two other candidates were sampled and REJECTED the same day: waste/garbage removal
+# ("פינוי אשפה"/"פינוי פסולת" — hazardous/medical/radioactive contamination, only 27 distinct
+# suppliers after cleanup) and events ("אירוע" — completely heterogeneous, not a recurring
+# service category). Do not re-add those without a real fix.
+PARKING_KEYWORDS = ["שירותי חניה"]
+
 # Transportation needed a refinement: raw "הסעות"/"הסעה" matches include software-system
 # contracts ("מערכת לניהול הסעות") and armored-vehicle security transport, not the shuttle/
 # transport SERVICE this domain means. Excluding those terms took 246 matches to 235 clean ones.
@@ -103,6 +113,8 @@ def classify_category(title: str | None, subjects: str | None) -> str:
         return "laundry"
     if any(kw in title for kw in TRANSPORT_KEYWORDS) and not any(kw in title for kw in TRANSPORT_EXCLUDE_KEYWORDS):
         return "transport"
+    if any(kw in title for kw in PARKING_KEYWORDS):
+        return "parking"
     if FACILITIES_TAG in subjects and not is_technical:
         return "facilities"
     if is_technical:
