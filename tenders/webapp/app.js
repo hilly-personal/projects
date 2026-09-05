@@ -180,6 +180,17 @@ async function fetchMarketStats(){
   return data;
 }
 
+// open_tenders is fully public (no gating — see webapp/supabase/add_open_tenders.sql for why:
+// an open tender is a public invitation to bid, not a specific supplier's exposed contract
+// status). Real submit_end dates only, filtered client-side against today in case a stale row
+// slips through before the next scrape run prunes it.
+async function fetchOpenTenders(){
+  const { data, error } = await sb.from('open_tenders').select('*').eq('category', currentCategory()).order('submit_end', { ascending: true });
+  if (error || !data) return [];
+  const todayIso = TODAY.toISOString().slice(0, 10);
+  return data.filter(t => !t.submit_end || t.submit_end >= todayIso);
+}
+
 // ---------- opportunity classification ----------
 function daysSince(iso){ return Math.round((TODAY - new Date(iso)) / 86400000); }
 
@@ -250,6 +261,29 @@ function showcaseOpportunityCards(){
       <div class="opp-why">${opp.why}</div>
     </div>`;
   }).filter(Boolean).join('');
+}
+
+// Real, currently-open tenders scraped from mr.gov.il's live public search — see
+// src/ingestion/scrape_open_tenders.py. Fully public, unlike the renewal-signal opportunities
+// below: an open tender is an invitation to bid, not a specific supplier's exposed status.
+function daysUntil(iso){
+  if (!iso) return null;
+  return Math.round((new Date(iso) - TODAY) / 86400000);
+}
+function renderOpenTenders(tenders){
+  if (!tenders.length){
+    return `<div class="opp-empty">לא זיהינו כרגע מכרזים פתוחים בתחום זה. הסריקה מתעדכנת מספר פעמים ביום.</div>`;
+  }
+  return `<div class="opp-grid">${tenders.slice(0, 6).map(t => {
+    const days = daysUntil(t.submit_end);
+    const urgent = days !== null && days <= 7;
+    return `<a class="opp-card open-tender ${urgent ? 'high' : 'medium'}" href="${t.detail_url}" target="_blank" rel="noopener">
+      <span class="opp-badge">${days !== null ? `עוד ${days} ימים להגשה` : 'מועד הגשה לא זמין'}</span>
+      <div class="opp-buyer">${t.buyer}</div>
+      <div class="opp-why">${t.title}</div>
+      <span class="open-tender-link">לצפייה במכרז ↗</span>
+    </a>`;
+  }).join('')}</div>`;
 }
 
 function renderOpportunities(mode, all, self){
@@ -715,6 +749,9 @@ async function renderEmptyState(){
     <div class="stat stat-clickable" data-action="open-quadrant-lightbox"><b class="ltr">${stats.active}</b><span>חברות עם התקשרות פעילה כרגע</span></div>
     <div class="stat stat-clickable" data-action="open-quadrant-lightbox"><b class="ltr">${stats.buyers}</b><span>גורמים ממשלתיים שונים במעקב</span></div>
     <div class="stat stat-clickable" data-action="open-quadrant-lightbox"><b class="ltr">${stats.total}</b><span>חברות ${domainLabel} שזוהו במאגר</span></div>`;
+
+  let openTenders; try { openTenders = await fetchOpenTenders(); } catch(e) { openTenders = []; }
+  document.getElementById('open-tenders').innerHTML = renderOpenTenders(openTenders);
 
   let allRes; try { allRes = await fetchAll(); } catch(e) { allRes = { mode: 'teaser', data: [] }; }
   document.getElementById('empty-opps').innerHTML = renderOpportunities(allRes.mode, allRes.data, null);

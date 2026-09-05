@@ -349,6 +349,9 @@ section{margin-bottom:36px}
 .opp-card.locked .eye-cta{margin-top:2px}
 .opp-card.showcase-opp{border-color:var(--accent-soft); cursor:pointer}
 .opp-card.showcase-opp:hover{border-color:var(--accent)}
+.opp-card.open-tender{text-decoration:none; color:inherit; display:flex}
+.opp-card.open-tender:hover{border-color:var(--accent); box-shadow:0 2px 10px rgba(16,24,39,.08)}
+.open-tender-link{font-size:.78rem; font-weight:700; color:var(--accent); align-self:flex-start}
 .opp-demo-tag{
   font-size:.68rem; font-weight:700; color:var(--accent); background:var(--accent-soft);
   padding:2px 9px; border-radius:100px; align-self:flex-start;

@@ -1,0 +1,28 @@
+name: Scrape live open tenders
+
+on:
+  schedule:
+    # Every 8 hours — submission deadlines are time-sensitive in a way the weekly exemptions
+    # refresh isn't, so this runs on its own, more frequent schedule.
+    - cron: "0 */8 * * *"
+  workflow_dispatch: {}
+
+defaults:
+  run:
+    working-directory: tenders
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run open-tenders scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python3 src/ingestion/scrape_open_tenders.py
