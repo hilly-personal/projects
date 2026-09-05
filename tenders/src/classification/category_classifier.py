@@ -78,8 +78,15 @@ TECHNICAL_MAINTENANCE_KEYWORDS = [
 
 
 def classify_category(title: str | None, subjects: str | None) -> str:
-    title = title or ""
-    subjects = subjects or ""
+    # `title or ""` / `subjects or ""` looks like it handles missing values, but doesn't: a
+    # pandas-produced NaN (float) is truthy in Python (bool(float('nan')) is True), so a NaN
+    # subjects/title value survives that check unchanged and then crashes the `in` operator
+    # below ("argument of type 'float' is not iterable") — this only surfaced when pandas
+    # happened to infer a numeric dtype with NaN gaps instead of None for a column, which
+    # varies by pandas version/environment, not something to special-case per-environment.
+    # pd.isna() catches None, NaN, and other pandas missing-value sentinels uniformly.
+    title = "" if pd.isna(title) else title
+    subjects = "" if pd.isna(subjects) else subjects
     combined = f"{title} {subjects}"
 
     is_technical = any(kw in combined for kw in TECHNICAL_MAINTENANCE_KEYWORDS)
