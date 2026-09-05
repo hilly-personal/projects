@@ -40,6 +40,8 @@ this — worth resolving before treating competitor-claim items as settled fact)
 - [ ] Construction vertical pack (contractor-classification-aware, site-visit dates, bank-guarantee amounts)
 - [ ] Lightweight competitor/market intelligence (who's winning, at what price) using Tier-1 award data
 - [ ] API/CRM integration (Salesforce, monday.com, Priority)
+- [ ] Tender-lawyer marketplace: a second, distinct user type (lawyers, not contractors) who subscribe to get matched with contractors requesting tender assistance or submission help, billed per engagement rather than the flat contractor subscription
+  — A real two-sided marketplace, not a feature toggle on the existing product: needs (1) a lawyer account type/role separate from `user_scopes`, (2) a request/matching flow (contractor asks for help -> relevant lawyers notified), (3) per-engagement billing distinct from Cardcom/Tranzila's single-sided flat subscription (a marketplace commission or per-case invoice model, not yet designed), and (4) real legal/liability scoping — this platform would be introducing/facilitating a professional-services relationship, not just showing data, which is a different liability posture than anything shipped so far.
 
 ## Open questions to resolve before treating this as final
 - [ ] Re-verify the competitor feature matrix with scrape dates / confidence labels per cell — several "not shown" entries (esp. Yfat, which is sales-assisted) may mean "not public" rather than "doesn't exist"
