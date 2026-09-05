@@ -52,3 +52,4 @@ this — worth resolving before treating competitor-claim items as settled fact)
 - Real access-model fix: signup-gated named data, fully public anonymized showcase examples, Supabase RLS-backed (not cosmetic CSS blur)
 - Onboarding flow: domain + location + deal-size selection, server-side persisted once signed in
 - Recurring weekly full-data refresh via GitHub Actions (verified running end-to-end)
+- 7th domain (parking / `שירותי חניה`) added and live in Supabase (211 companies) — same day, found and fixed a real bug: the open-tenders scraper's CI workflow had never installed dependencies, so every scheduled run since it was created had been silently failing with `ModuleNotFoundError`; only local `python3` runs had ever succeeded. Fixed and reverified with a real passing run.
