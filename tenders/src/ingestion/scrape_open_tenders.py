@@ -4,7 +4,7 @@ NOT the historical bulk export (data/raw/tenders_raw.xls), which was confirmed s
 rows show 2019 publish dates still carrying a "published" status years later — see the
 open-tender-sourcing plan for the investigation). This is a different, separate live system:
 
-    https://mr.gov.il/ilgstorefront/he/search/?q=:updateDate:archive:false&s=TENDER&page=N
+    https://mr.gov.il/ilgstorefront/he/search/?q=:updateDate:archive:false&s=TENDER&text=<kw>&page=N
 
 Server-rendered HTML, no JS/browser automation needed (verified with plain requests). Each
 listing row shows title, buyer, publication number, and a status ("פורסם" / "חלף מועד הגשה" —
@@ -12,13 +12,21 @@ published / submission deadline passed) directly — no need to visit every deta
 know if something's closed. Detail pages (/ilgstorefront/he/p/<publication_number>) additionally
 carry the real submission window (מועד תחילת ההגשה / מועד אחרון להגשה).
 
-Delta behavior: the listing itself is cheap and always fully paginated (up to MAX_PAGES, a
-politeness/safety bound — sort order isn't reliably recency-based, so we can't assume "stop once
-a page is all-known" the way a recency-sorted feed would allow). The real savings this scraper
-implements is on the EXPENSIVE part: detail-page fetches are skipped entirely for any
-publication_number already known to us — whether previously closed, or already carrying a
+Per-keyword targeted search, not a blanket scan: the bare "tenders" search (no `text=`) returns
+~8,600 results — scanning all of it to classify client-side would mean ~430 pages of mostly
+irrelevant listings every run. The site's own search actually filters server-side on `text=`
+(confirmed: text=ניקיון narrows 8,600 -> 71, and the 71 were genuinely on-topic, not a
+coincidental match) — so this runs one targeted search per domain keyword instead
+(~500 total results across all 6 domains' keywords combined, ~26 pages, not 430). The site's own
+text-match logic isn't assumed to be exactly as strict as ours, though — `classify_title()` is
+still applied as a final confirmation filter on every result, same as before.
+
+Delta behavior: listing pages are cheap and always fully paginated per keyword. The real savings
+this scraper implements is on the EXPENSIVE part: detail-page fetches are skipped entirely for
+any publication_number already known to us — whether previously closed, or already carrying a
 correct submit_end date from a prior run. Only genuinely new, domain-relevant, still-open
-tenders get a detail-page fetch.
+tenders get a detail-page fetch. Duplicates across keywords (e.g. a tender matching both
+"שמירה" and "אבטחה") are only stored once per run.
 
 Usage:
     export SUPABASE_URL=... SUPABASE_SERVICE_KEY=...
@@ -31,19 +39,36 @@ import os
 import re
 import sys
 import time
+import urllib.parse
 import urllib.request
 import urllib.error
 from datetime import date, datetime
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "..", "classification"))
-from category_classifier import classify_category  # noqa: E402 (reused, not reinvented)
+from category_classifier import (  # noqa: E402 (reused, not reinvented)
+    classify_category,
+    CLEANING_KEYWORDS,
+    SECURITY_KEYWORDS,
+    CATERING_KEYWORDS,
+    GARDENING_KEYWORDS,
+    LAUNDRY_KEYWORDS,
+    TRANSPORT_KEYWORDS,
+)
 
 BASE = "https://mr.gov.il/ilgstorefront/he/search/"
-SEARCH_PARAMS = "?q=%3AupdateDate%3Aarchive%3Afalse&text=&s=TENDER"
-MAX_PAGES = 60  # politeness/safety bound — see module docstring; ~20 results/page
+MAX_PAGES_PER_KEYWORD = 15  # politeness/safety bound per keyword — ~20 results/page; the
+                            # largest single keyword found so far ("כיבוד") was 166 results (~9 pages)
 REQUEST_DELAY_SECONDS = 0.4
 VALIDATED_CATEGORIES = {"cleaning", "security", "catering", "gardening", "laundry", "transport"}
+
+# Every keyword actually searched for, deduplicated across domains (e.g. אבטחה/שמירה both
+# belong to "security" but are separate search terms) — keep this in sync with
+# category_classifier.py's own *_KEYWORDS lists rather than re-deriving a separate list by hand.
+SEARCH_KEYWORDS = sorted(set(
+    CLEANING_KEYWORDS + SECURITY_KEYWORDS + CATERING_KEYWORDS
+    + GARDENING_KEYWORDS + LAUNDRY_KEYWORDS + TRANSPORT_KEYWORDS
+))
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; TenderIntelligenceBot/1.0; research use)"}
 
@@ -160,72 +185,81 @@ def main():
 
     today = date.today().isoformat()
     new_rows = []
-    seen_this_run = set()
+    seen_this_run = set()  # dedupes across keywords, e.g. a tender matching both שמירה and אבטחה
     skipped_known = 0
     skipped_offdomain = 0
+    skipped_closed = 0
 
-    for page in range(MAX_PAGES):
-        html = fetch(f"{BASE}{SEARCH_PARAMS}&page={page}")
-        items = parse_listing_page(html)
-        if not items:
-            print(f"page {page}: no results, stopping")
-            break
+    for keyword in SEARCH_KEYWORDS:
+        encoded_kw = urllib.parse.quote(keyword)
+        print(f"--- searching keyword {keyword!r} ---")
+        for page in range(MAX_PAGES_PER_KEYWORD):
+            html = fetch(f"{BASE}?q=%3AupdateDate%3Aarchive%3Afalse&text={encoded_kw}&s=TENDER&page={page}")
+            items = parse_listing_page(html)
+            if not items:
+                break
 
-        for item in items:
-            pub = item["publication_number"]
-            seen_this_run.add(pub)
+            for item in items:
+                pub = item["publication_number"]
+                if pub in seen_this_run:
+                    continue  # already handled earlier in this run, via a different keyword
+                seen_this_run.add(pub)
 
-            category = classify_title(item["title"])
-            if category not in VALIDATED_CATEGORIES:
-                skipped_offdomain += 1
-                continue
+                # the site's own text search isn't assumed to be as strict as our classifier —
+                # confirm with the same title-only logic used everywhere else in this project
+                category = classify_title(item["title"])
+                if category not in VALIDATED_CATEGORIES:
+                    skipped_offdomain += 1
+                    continue
 
-            if pub in known:
-                skipped_known += 1
-                continue  # already known — the actual delta savings: no detail-page fetch
+                if pub in known:
+                    skipped_known += 1
+                    continue  # already known — the actual delta savings: no detail-page fetch
 
-            # The listing's status label is inconsistently rendered — plenty of genuinely open,
-            # recent tenders show no status at all (confirmed by inspecting raw HTML, not a
-            # regex miss). Relying on status == "פורסם" as the primary gate silently drops real
-            # open tenders that just don't happen to carry that label. Status is only used here
-            # as a cheap, explicit "definitely closed" shortcut; the real source of truth is the
-            # submit_end date compared to today.
-            if item["status"] == "חלף מועד הגשה":
-                continue  # explicitly closed and never seen before — not worth storing
+                # The listing's status label is inconsistently rendered — plenty of genuinely
+                # open, recent tenders show no status at all (confirmed by inspecting raw HTML,
+                # not a regex miss). Relying on status == "פורסם" as the primary gate silently
+                # drops real open tenders that just don't happen to carry that label. Status is
+                # only used here as a cheap, explicit "definitely closed" shortcut; the real
+                # source of truth is the submit_end date compared to today.
+                if item["status"] == "חלף מועד הגשה":
+                    skipped_closed += 1
+                    continue  # explicitly closed and never seen before — not worth storing
 
-            # the listing sometimes already carries the deadline — only pay for a detail-page
-            # fetch when it doesn't (further reduces request volume beyond the known-tender skip)
-            if item["listing_submit_end"]:
-                submit_start, submit_end = item["publish_date"], item["listing_submit_end"]
-            else:
-                time.sleep(REQUEST_DELAY_SECONDS)
-                detail_html = fetch(f"https://mr.gov.il/ilgstorefront/he/p/{pub}")
-                dates = parse_detail_page(detail_html)
-                submit_start, submit_end = dates["submit_start"], dates["submit_end"]
+                # the listing sometimes already carries the deadline — only pay for a
+                # detail-page fetch when it doesn't (reduces request volume further)
+                if item["listing_submit_end"]:
+                    submit_start, submit_end = item["publish_date"], item["listing_submit_end"]
+                else:
+                    time.sleep(REQUEST_DELAY_SECONDS)
+                    detail_html = fetch(f"https://mr.gov.il/ilgstorefront/he/p/{pub}")
+                    dates = parse_detail_page(detail_html)
+                    submit_start, submit_end = dates["submit_start"], dates["submit_end"]
 
-            if submit_end and submit_end < today:
-                continue  # date-verified closed, never seen before — not worth storing
+                if submit_end and submit_end < today:
+                    skipped_closed += 1
+                    continue  # date-verified closed, never seen before — not worth storing
 
-            new_rows.append({
-                "publication_number": pub,
-                "category": category,
-                "title": item["title"],
-                "buyer": item["buyer"],
-                "publish_date": item["publish_date"],
-                "submit_start": submit_start,
-                "submit_end": submit_end,
-                "detail_url": f"https://mr.gov.il/ilgstorefront/he/p/{pub}",
-                "first_seen": today,
-                "last_checked": today,
-            })
+                new_rows.append({
+                    "publication_number": pub,
+                    "category": category,
+                    "title": item["title"],
+                    "buyer": item["buyer"],
+                    "publish_date": item["publish_date"],
+                    "submit_start": submit_start,
+                    "submit_end": submit_end,
+                    "detail_url": f"https://mr.gov.il/ilgstorefront/he/p/{pub}",
+                    "first_seen": today,
+                    "last_checked": today,
+                })
 
-        time.sleep(REQUEST_DELAY_SECONDS)
+            time.sleep(REQUEST_DELAY_SECONDS)
 
     if new_rows:
         sb_request(url, key, "POST", "open_tenders", new_rows, {"Prefer": "resolution=merge-duplicates,return=minimal"})
 
-    print(f"Scanned {len(seen_this_run)} listings across up to {MAX_PAGES} pages")
-    print(f"Skipped {skipped_known} already-known, {skipped_offdomain} off-domain")
+    print(f"Scanned {len(seen_this_run)} distinct listings across {len(SEARCH_KEYWORDS)} keywords")
+    print(f"Skipped {skipped_known} already-known, {skipped_offdomain} off-domain, {skipped_closed} closed-and-new")
     print(f"Inserted {len(new_rows)} new open tenders")
 
 
