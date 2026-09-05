@@ -1,0 +1,740 @@
+<title>טרם — הזדמנויות</title>
+<style>
+:root{
+  --page:#eceae5; --card:#fbfbfa; --ink:#14181a; --ink-soft:#6a706e; --ink-mute:#8a908e;
+  --line:#ecece8; --line-2:#e4e4e0; --line-3:#e2e2dd; --surface-2:#f7f7f5; --chip:#ecece6;
+  --p:oklch(0.42 0.11 260); --pd:oklch(0.55 0.13 260); --pb:oklch(0.96 0.03 250);
+  --af:oklch(0.44 0.13 45); --ad:oklch(0.58 0.15 45); --ab:oklch(0.96 0.04 60);
+  --neutral-bar:#dcdcd6; --neutral-bar-2:#c9c9c2; --neutral-bar-3:#e6e6e1;
+}
+*{box-sizing:border-box}
+html,body{background:var(--page); margin:0}
+body{direction:rtl; font-family:"Assistant",system-ui,sans-serif; color:var(--ink)}
+a{color:var(--p); text-decoration:none}
+a:hover{text-decoration:underline}
+.ltr{direction:ltr; unicode-bidi:embed; font-family:"IBM Plex Mono",ui-monospace,monospace; font-variant-numeric:tabular-nums}
+[hidden]{display:none !important}
+.shell{min-height:100vh; background:var(--page); padding:28px; display:flex; justify-content:center}
+.frame{
+  width:100%; max-width:1180px; background:var(--card); border:1px solid var(--line-2);
+  border-radius:16px; box-shadow:0 30px 70px -40px rgba(20,24,26,.4); overflow:hidden;
+  display:flex; flex-direction:column;
+}
+header.topbar{
+  display:flex; align-items:center; justify-content:space-between; padding:16px 28px;
+  border-bottom:1px solid var(--line); background:#fff; flex-wrap:wrap; gap:12px;
+}
+.brand{display:flex; align-items:center; gap:11px}
+.brand .mark{
+  width:27px; height:27px; border-radius:7px; background:var(--ink); color:var(--card);
+  display:flex; align-items:center; justify-content:center; font-family:"Frank Ruhl Libre",serif;
+  font-size:15px; font-weight:700;
+}
+.brand .name{font-size:16.5px; font-weight:700; letter-spacing:-.01em}
+.brand .sep{width:1px; height:16px; background:var(--line-3)}
+.brand .scope{font-size:13.5px; color:var(--ink-mute)}
+.navwrap{display:flex; align-items:center; gap:24px}
+.nav{display:flex; gap:22px; font-size:14.5px}
+.nav .tab{cursor:pointer; display:inline-flex; align-items:center; gap:6px; padding-bottom:2px; border-bottom:2px solid transparent}
+.nav .count{font-family:"IBM Plex Mono",monospace; font-size:11.5px; color:var(--ink-mute)}
+.nav .count.hot{color:var(--af); font-weight:700}
+.avatar{
+  width:28px; height:28px; border-radius:50%; background:var(--chip); display:flex; align-items:center;
+  justify-content:center; font-size:12.5px; font-weight:600; color:var(--ink-soft); flex-shrink:0;
+}
+
+/* feed */
+.feed-head{padding:28px 28px 10px; display:flex; align-items:flex-end; justify-content:space-between; gap:24px; flex-wrap:wrap}
+.feed-head h1{margin:0; font-size:27px; font-weight:600; letter-spacing:-.015em}
+.feed-head .sub{font-size:15px; color:var(--ink-soft)}
+.filters{display:flex; gap:8px; flex-wrap:wrap}
+.filter-chip{font-size:13.5px; font-weight:600; padding:7px 13px; border-radius:999px; border:1px solid var(--line-3); background:#fff; color:var(--ink-soft); cursor:pointer}
+.filter-chip.active{background:var(--ink); color:#fff; border-color:var(--ink)}
+.feed-table{padding:14px 28px 24px}
+.feed-cols{
+  display:grid; grid-template-columns:2.5fr 1.25fr 1.15fr .75fr .8fr .5fr; gap:14px;
+  padding:0 16px 10px; font-size:12.5px; font-weight:600; letter-spacing:.04em; color:var(--ink-mute);
+}
+.feed-rows{display:flex; flex-direction:column; gap:8px}
+.feed-row{
+  display:grid; grid-template-columns:2.5fr 1.25fr 1.15fr .75fr .8fr .5fr; gap:14px; align-items:center;
+  background:#fff; border:1px solid var(--line-2); border-radius:11px; padding:15px 16px; cursor:pointer;
+  transition:border-color .15s, box-shadow .15s;
+}
+.feed-row:hover{border-color:#b9b9b1; box-shadow:0 8px 20px -14px rgba(20,24,26,.4)}
+.feed-row .lead{display:flex; flex-direction:column; gap:3px; min-width:0}
+.feed-row .lead .t{font-size:16.5px; font-weight:600; letter-spacing:-.01em; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.feed-row .lead .s{font-size:13.5px; color:var(--ink-soft); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.stage-pill{display:inline-flex; align-items:center; gap:7px; font-size:13.5px; font-weight:600}
+.stage-pill .dot{width:7px; height:7px; border-radius:50%}
+.win-cell{font-size:15px; font-weight:600}
+.conf-cell{display:flex; flex-direction:column; gap:5px}
+.conf-cell .n{font-size:15px; font-weight:600}
+.conf-track{height:4px; border-radius:2px; background:var(--chip); overflow:hidden}
+.conf-fill{display:block; height:4px}
+.val-cell{font-size:15px; color:#3f4644}
+.track-cell{font-size:12.5px; font-weight:600; text-align:left; color:var(--p)}
+.feed-footer{display:flex; align-items:center; justify-content:space-between; padding:15px 28px; border-top:1px solid var(--line); background:var(--surface-2); flex-wrap:wrap; gap:10px}
+.feed-footer .note{font-size:13.5px; color:var(--ink-mute)}
+.feed-footer .link{font-size:14px; font-weight:600; color:var(--p); cursor:pointer}
+.region-tag{font-size:11.5px; font-weight:600; border-radius:5px; padding:1px 7px; color:var(--ink-mute); border:1px solid var(--line-2)}
+.region-tag.approx{color:var(--af); border:1px dashed var(--ad)}
+.scope-line{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:2px}
+.scope-line .sep{width:1px; height:13px; background:var(--neutral-bar)}
+.scope-line .cur{font-size:14px; color:var(--ink-soft)}
+.scope-line .cur b{font-weight:600; color:var(--ink)}
+.scope-line .change{font-size:14px; font-weight:600; color:var(--p); cursor:pointer}
+
+/* dossier */
+.crumb{display:flex; align-items:center; gap:10px; padding:13px 28px; border-bottom:1px solid var(--line); background:var(--surface-2); flex-wrap:wrap}
+.crumb .back{font-size:14px; font-weight:600; color:var(--p); cursor:pointer}
+.crumb .slash{font-size:14px; color:#b9bdbb}
+.crumb .body{font-size:14px; color:var(--ink-soft)}
+.crumb .code{font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--ink-mute); margin-inline-start:auto}
+.dossier-body{padding:30px 28px 26px; display:flex; flex-direction:column; gap:26px}
+.dossier-head{display:flex; flex-direction:column; gap:14px}
+.stage-chip{display:inline-flex; align-items:center; gap:7px; font-size:13.5px; font-weight:600; padding:6px 12px; border-radius:999px}
+.stage-chip .dot{width:7px; height:7px; border-radius:50%}
+.dossier-updated{font-size:13.5px; color:var(--ink-mute)}
+.dossier-head h1{margin:0; font-size:30px; font-weight:600; line-height:1.35; letter-spacing:-.015em; text-wrap:pretty; max-width:780px}
+.dossier-head h1 .mark{border-bottom:2px solid var(--pd)}
+.dossier-basis{margin:0; font-size:16.5px; line-height:1.6; color:#5b6260; max-width:640px}
+.stat-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:12px}
+.stat-card{background:#fff; border:1px solid var(--line-2); border-radius:11px; padding:16px 18px; display:flex; flex-direction:column; gap:6px}
+.stat-card .k{font-size:13px; color:var(--ink-mute)}
+.stat-card .v{font-size:25px; font-weight:600; letter-spacing:-.02em}
+.stat-card .sub{font-size:13px; color:var(--ink-soft)}
+.dossier-grid{display:grid; grid-template-columns:1.55fr 1fr; gap:16px; align-items:start}
+@media (max-width:860px){ .dossier-grid{grid-template-columns:1fr} .stat-grid{grid-template-columns:1fr 1fr} }
+.col-main{display:flex; flex-direction:column; gap:16px}
+.tl-label{font-size:13px; font-weight:600; letter-spacing:.06em; color:var(--ink-mute)}
+.track-bar{display:flex; align-items:stretch; gap:6px}
+.track-seg{display:flex; flex-direction:column; gap:8px}
+.track-seg .bar{height:6px; border-radius:3px}
+.track-seg .lbl{font-size:12.5px; font-weight:600}
+.track-seg .dt{font-size:12px; color:var(--ink-mute)}
+.why-card{background:#fff; border:1px solid var(--line-2); border-radius:11px; overflow:hidden}
+.why-top{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:15px 18px; flex-wrap:wrap}
+.why-title{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+.why-title .t{font-size:16px; font-weight:600}
+.why-badge{font-size:12.5px; font-weight:600; color:var(--p); background:var(--pb); padding:3px 9px; border-radius:999px}
+.why-toggle{font-family:inherit; font-size:14.5px; font-weight:600; color:var(--ink); background:#f2f2ef; border:1px solid var(--line-3); padding:7px 14px; border-radius:8px; cursor:pointer}
+.why-toggle:hover{background:#e9e9e4}
+.why-body{border-top:1px solid var(--line); padding:6px 18px 18px; display:flex; flex-direction:column}
+.why-item{display:flex; gap:14px; padding:16px 0; border-bottom:1px solid #f1f1ee}
+.why-item .n{width:26px; height:26px; flex:none; border-radius:8px; background:var(--pb); color:var(--p); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700}
+.why-item .body{display:flex; flex-direction:column; gap:5px}
+.why-item .t{font-size:15.5px; font-weight:600}
+.why-item .d{font-size:14.5px; line-height:1.6; color:#5b6260}
+.why-item .src{font-size:12.5px; color:var(--ink-mute)}
+.why-missing{font-size:14px; line-height:1.6; color:#5b6260; padding-top:14px}
+.changes-card{background:#fff; border:1px solid var(--line-2); border-radius:11px; padding:15px 18px; display:flex; flex-direction:column; gap:12px}
+.changes-card .head{display:flex; align-items:baseline; justify-content:space-between; gap:12px}
+.changes-card .t{font-size:16px; font-weight:600}
+.changes-card .since{font-size:12.5px; color:var(--ink-mute)}
+.change-row{display:flex; gap:12px; padding-bottom:12px; border-bottom:1px solid #f4f4f1}
+.change-row .dt{font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--ink-mute); min-width:58px; padding-top:3px}
+.change-row .dot{width:7px; height:7px; border-radius:50%; margin-top:8px; flex:none}
+.change-row .body{display:flex; flex-direction:column; gap:4px; flex:1; min-width:0}
+.change-row .toprow{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.change-row .label{font-size:11.5px; font-weight:600; padding:2px 8px; border-radius:999px}
+.change-row .delta{font-family:"IBM Plex Mono",monospace; font-size:12.5px; font-weight:500}
+.change-row .desc{font-size:14.5px; line-height:1.5}
+.change-row .src{font-size:12.5px; color:var(--ink-mute)}
+.changes-empty{background:var(--surface-2); border:1px dashed var(--line-2); border-radius:9px; padding:16px 18px; display:flex; flex-direction:column; gap:4px}
+.changes-empty .t{font-size:14.5px; font-weight:600}
+.changes-empty .d{font-size:13.5px; line-height:1.55; color:var(--ink-soft)}
+.changes-footnote{font-size:12.5px; line-height:1.5; color:var(--ink-mute)}
+.col-side{display:flex; flex-direction:column; gap:14px}
+.facts-card{background:#fff; border:1px solid var(--line-2); border-radius:11px; padding:16px 18px; display:flex; flex-direction:column; gap:11px}
+.facts-card .t{font-size:15px; font-weight:600}
+.fact-row{display:flex; justify-content:space-between; gap:10px; padding-bottom:9px; border-bottom:1px solid #f4f4f1; font-size:14px}
+.fact-row .k{color:var(--ink-mute)}
+.fact-row .v{font-weight:600}
+.facts-note{font-size:12.5px; color:var(--ink-mute); line-height:1.5}
+.action-card{border-radius:11px; padding:16px 18px; display:flex; flex-direction:column; gap:11px}
+.action-card .t{font-size:15px; font-weight:600}
+.action-card .note{font-size:13.5px; line-height:1.55; color:#5b6260}
+.action-card button{font-family:inherit; font-size:15px; font-weight:600; padding:11px; border-radius:9px; cursor:pointer; width:100%}
+.action-card .remind{font-size:14.5px; font-weight:600; color:var(--ink); background:#fff; border:1px solid var(--line-3); padding:10px; border-radius:9px; cursor:pointer; width:100%}
+.action-card .remind:hover{border-color:var(--ink)}
+.action-card .share{font-size:14px; font-weight:600; color:var(--p); cursor:pointer; align-self:center; background:none; border:0}
+.dossier-footer{display:flex; align-items:center; justify-content:space-between; gap:16px; padding:15px 28px; border-top:1px solid var(--line); background:var(--surface-2); flex-wrap:wrap}
+.dossier-footer .note{font-size:13.5px; color:var(--ink-mute)}
+.dossier-footer .link{font-size:14px; font-weight:600; color:var(--p); cursor:pointer}
+.stub-tip{font-size:12px; background:var(--ink); color:#fff; padding:6px 10px; border-radius:6px; position:fixed; bottom:20px; left:50%; transform:translateX(-50%); opacity:0; pointer-events:none; transition:opacity .15s; z-index:20}
+.stub-tip.show{opacity:1}
+
+/* digest */
+.digest-head{padding:28px 28px 0; display:flex; align-items:flex-end; justify-content:space-between; gap:24px; flex-wrap:wrap}
+.digest-head h1{margin:0; font-size:27px; font-weight:600; letter-spacing:-.015em}
+.digest-head .sub{font-size:15px; color:var(--ink-soft)}
+.digest-controls{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+.digest-controls .lbl{font-size:13.5px; color:var(--ink-mute)}
+.freq-chip{font-size:13.5px; font-weight:600; padding:7px 13px; border-radius:999px; cursor:pointer}
+.digest-body{padding:22px 28px 26px; display:flex; flex-direction:column; gap:22px}
+.digest-section{display:flex; flex-direction:column; gap:10px}
+.digest-label{font-size:13px; font-weight:600; letter-spacing:.06em; color:var(--ink-mute)}
+.digest-empty{background:#fff; border:1px solid var(--line-2); border-radius:11px; padding:22px; display:flex; flex-direction:column; gap:6px}
+.digest-empty .t{font-size:16px; font-weight:600}
+.digest-empty .d{font-size:14.5px; line-height:1.6; color:#5b6260; max-width:560px}
+.digest-item{background:#fff; border:1px solid var(--line-2); border-radius:11px; padding:15px 17px; display:flex; gap:14px; align-items:flex-start; cursor:pointer; transition:border-color .15s, box-shadow .15s}
+.digest-item:hover{border-color:#b9b9b1; box-shadow:0 8px 20px -14px rgba(20,24,26,.4)}
+.digest-item .dot{width:8px; height:8px; border-radius:50%; margin-top:8px; flex:none}
+.digest-item .body{display:flex; flex-direction:column; gap:5px; flex:1; min-width:0}
+.digest-item .toprow{display:flex; align-items:center; gap:9px; flex-wrap:wrap}
+.digest-item .name{font-size:16px; font-weight:600; letter-spacing:-.01em}
+.digest-item .label{font-size:11.5px; font-weight:600; padding:2px 8px; border-radius:999px}
+.digest-item .delta{font-family:"IBM Plex Mono",monospace; font-size:12.5px; font-weight:500}
+.digest-item .desc{font-size:14.5px; line-height:1.55; color:#3f4644}
+.digest-item .meta{font-size:12.5px; color:var(--ink-mute)}
+.digest-item .side{display:flex; flex-direction:column; align-items:flex-end; gap:5px; flex:none}
+.digest-item .date{font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--ink-mute)}
+.digest-item .open{font-size:13.5px; font-weight:600; color:var(--p)}
+.quiet-head{display:flex; align-items:center; gap:12px}
+.quiet-head .rule{flex:1; height:1px; background:var(--line)}
+.quiet-head .toggle{font-size:13.5px; font-weight:600; color:var(--ink-soft); cursor:pointer}
+.quiet-row{display:flex; gap:12px; align-items:baseline; padding:9px 4px; border-bottom:1px dashed var(--line)}
+.quiet-row .date{font-family:"IBM Plex Mono",monospace; font-size:12px; color:#b9bdbb; min-width:58px}
+.quiet-row .t{font-size:14px; color:var(--ink-mute); flex:1}
+.quiet-row .src{font-size:12.5px; color:#b9bdbb}
+
+/* settings */
+.settings-head{padding:28px 28px 0; display:flex; flex-direction:column; gap:6px}
+.settings-head h1{margin:0; font-size:27px; font-weight:600; letter-spacing:-.015em}
+.settings-head .sub{font-size:15px; color:var(--ink-soft); max-width:640px; line-height:1.55}
+.settings-grid{padding:24px 28px 26px; display:grid; grid-template-columns:1.15fr 1fr; gap:18px; align-items:start}
+@media (max-width:860px){ .settings-grid{grid-template-columns:1fr} }
+.settings-col{display:flex; flex-direction:column; gap:18px}
+.settings-card{background:#fff; border:1px solid var(--line-2); border-radius:12px; padding:18px; display:flex; flex-direction:column; gap:13px}
+.settings-card .t{font-size:16px; font-weight:600}
+.district-row{display:flex; flex-wrap:wrap; gap:8px}
+.district-chip{font-size:14px; font-weight:600; padding:8px 14px; border-radius:999px; cursor:pointer}
+.national-row{display:flex; align-items:flex-start; justify-content:space-between; gap:14px; border-top:1px solid #f1f1ee; padding-top:13px}
+.national-row .body{display:flex; flex-direction:column; gap:4px}
+.national-row .t2{font-size:15px; font-weight:600}
+.national-row .d{font-size:13.5px; line-height:1.55; color:#5b6260; max-width:360px}
+.national-toggle{font-size:13.5px; font-weight:600; padding:8px 14px; border-radius:999px; cursor:pointer; white-space:nowrap}
+.scope-summary{background:var(--surface-2); border-radius:9px; padding:12px 14px; display:flex; flex-direction:column; gap:3px}
+.scope-summary .t{font-size:14px; font-weight:600}
+.scope-summary .d{font-size:13px; line-height:1.5; color:var(--ink-soft)}
+.lookup-head{display:flex; align-items:baseline; justify-content:space-between; gap:12px}
+.lookup-head .note{font-size:13px; color:var(--ink-mute)}
+.lookup-cols{display:grid; grid-template-columns:1.5fr .8fr 1.3fr; gap:10px; font-size:12.5px; font-weight:600; color:var(--ink-mute); padding-bottom:8px; border-bottom:1px solid #f1f1ee}
+.lookup-row{display:grid; grid-template-columns:1.5fr .8fr 1.3fr; gap:10px; align-items:center; padding-bottom:10px; border-bottom:1px solid #f7f7f4}
+.lookup-row .body{font-size:14px; font-weight:600}
+.lookup-row .tag{font-size:12px; font-weight:600; border-radius:6px; padding:3px 8px; justify-self:start}
+.lookup-row .src{font-size:13px; line-height:1.45; color:var(--ink-soft)}
+.lookup-note{font-size:13px; line-height:1.55; color:var(--ink-soft)}
+.notif-row{display:flex; align-items:center; justify-content:space-between; gap:12px; padding-bottom:11px; border-bottom:1px solid #f4f4f1}
+.notif-row .t{font-size:14.5px}
+.notif-row .state{font-size:13px; font-weight:600}
+.settings-footer{display:flex; align-items:center; justify-content:space-between; padding:15px 28px; border-top:1px solid var(--line); background:var(--surface-2)}
+.settings-footer .note{font-size:13.5px; color:var(--ink-mute)}
+.settings-footer .save{font-size:14px; font-weight:600; color:var(--p); cursor:pointer}
+
+/* clients stub */
+.stub-screen{padding:40px 28px; display:flex; flex-direction:column; gap:10px; align-items:flex-start}
+.stub-screen h1{margin:0; font-size:24px; font-weight:600; letter-spacing:-.015em}
+.stub-screen p{margin:0; font-size:15px; line-height:1.6; color:#5b6260; max-width:560px}
+.stub-screen .back{font-size:14px; font-weight:600; color:var(--p); cursor:pointer}
+
+@media print{
+  header.topbar, .filters, .feed-footer .link, .crumb, .action-card, .dossier-footer .link{display:none !important}
+  .shell{padding:0} .frame{box-shadow:none; border:0; border-radius:0; max-width:100%}
+}
+</style>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@700&family=Assistant:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<div class="shell">
+  <div class="frame">
+    <header class="topbar">
+      <div class="brand">
+        <span class="mark">ט</span>
+        <span class="name">טרם</span>
+        <span class="sep"></span>
+        <span class="scope">ניקיון ואחזקה · <span id="header-scope">כלל הארץ</span></span>
+      </div>
+      <div class="navwrap">
+        <div class="nav" id="nav"></div>
+        <span class="avatar">אב</span>
+      </div>
+    </header>
+
+    <div id="screen-feed">
+      <div class="feed-head">
+        <div>
+          <h1 id="feed-title">הזדמנויות מתגבשות</h1>
+          <div class="scope-line">
+            <span class="sub">מסודר לפי ביטחון בחלון. תחזיות, לא הבטחות.</span>
+            <span class="sep"></span>
+            <span class="cur">היקף המנוי: <b id="feed-scope-label"></b></span>
+            <span class="change" id="feed-goto-settings">שנה בהגדרות</span>
+          </div>
+        </div>
+        <div class="filters" id="filters"></div>
+      </div>
+      <div class="feed-table">
+        <div class="feed-cols">
+          <span>חוזה ומזמין</span><span>שלב מחזור־חיים</span><span>חלון פרסום חזוי</span><span>ביטחון</span><span>היקף</span><span></span>
+        </div>
+        <div class="feed-rows" id="feed-rows"></div>
+      </div>
+      <div class="feed-footer">
+        <span class="note" id="feed-footnote"></span>
+        <span class="link" id="feed-showall">הצג הכל</span>
+      </div>
+    </div>
+
+    <div id="screen-dossier" hidden>
+      <div class="crumb">
+        <span class="back" id="back-to-feed">← כל ההזדמנויות</span>
+        <span class="slash">/</span>
+        <span class="body" id="crumb-body"></span>
+        <span class="code ltr" id="crumb-code"></span>
+      </div>
+      <div class="dossier-body" id="dossier-body"></div>
+      <div class="dossier-footer">
+        <span class="note">כל ההערכות נגזרות ממסמכים פומביים בלבד. תחזית, לא הבטחה.</span>
+        <span class="link" id="dossier-pdf">הורד תיק כ-PDF</span>
+      </div>
+    </div>
+
+    <div id="screen-digest" hidden>
+      <div class="digest-head">
+        <div>
+          <h1 id="digest-title">מה השתנה</h1>
+          <div class="sub" id="digest-sub"></div>
+        </div>
+        <div class="digest-controls">
+          <span class="lbl">תקציר</span>
+          <div id="digest-freqs" style="display:flex; gap:8px"></div>
+        </div>
+      </div>
+      <div class="digest-body" id="digest-body"></div>
+      <div class="dossier-footer">
+        <span class="note">התקציר מדווח על תזוזות בראיות הפומביות — לא על החלטות שהתקבלו. תחזית, לא הבטחה.</span>
+        <span class="link" id="digest-goto-settings">הגדרות התראות</span>
+      </div>
+    </div>
+
+    <div id="screen-settings" hidden>
+      <div class="settings-head">
+        <h1>היקף המנוי</h1>
+        <span class="sub">ההיקף קובע אילו חוזים נכנסים לניטור השוטף — לא סינון תצוגה. שינוי כאן משפיע על הפיד, על התקצירים ועל ההתראות.</span>
+      </div>
+      <div class="settings-grid" id="settings-grid"></div>
+      <div class="settings-footer">
+        <span class="note">שינוי היקף נכנס לתוקף מיידית בתצוגה זו (בפועל: עד 24 שעות בסריקה הבאה).</span>
+        <span class="save" id="settings-save">שמור היקף</span>
+      </div>
+    </div>
+
+    <div id="screen-clients" hidden>
+      <div class="stub-screen">
+        <h1>לקוחות שלי</h1>
+        <p>התצוגה ההגנתית — החוזים שאתם מחזיקים, מנוקדים לפי חשיפה לאיבוד — מעוצבת בנפרד וטרם חוברה לאפליקציה הזו.</p>
+        <span class="back" id="clients-back">← חזרה להזדמנויות</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+<div class="stub-tip" id="stub-tip">בקרוב</div>
+
+<script>
+const OPPS = __DATA__;
+const META = __META__;
+const STAGE_COLORS = {
+  amber: { fg: 'oklch(0.44 0.13 45)', dot: 'oklch(0.58 0.15 45)', chipBg: 'oklch(0.96 0.04 60)', chipFg: 'oklch(0.44 0.13 45)' },
+  blue: { fg: 'oklch(0.42 0.11 260)', dot: 'oklch(0.55 0.13 260)', chipBg: 'oklch(0.96 0.03 250)', chipFg: 'oklch(0.42 0.11 260)' },
+  neutral: { fg: '#6a706e', dot: '#c1c1ba', chipBg: '#f2f2ef', chipFg: '#5b6260' },
+};
+const TRACK_COLORS = { neutral: '#dcdcd6', blue: 'oklch(0.55 0.13 260)', amber: 'oklch(0.58 0.15 45)', 'neutral-light': '#e6e6e1' };
+
+function fmtAmount(a){
+  const n = parseFloat(a);
+  if (isNaN(n) || n <= 0) return null;
+  return '₪' + Math.round(n).toLocaleString('en-US');
+}
+
+function loadJSON(key, fallback){ try { return JSON.parse(localStorage.getItem(key) || 'null') || fallback; } catch(e){ return fallback; } }
+function saveJSON(key, v){ try { localStorage.setItem(key, JSON.stringify(v)); } catch(e){} }
+
+const defaultDistricts = {};
+META.districts.forEach(d => defaultDistricts[d] = true);
+
+let state = {
+  route: 'feed', sel: null, whyOpen: true, filter: 'all', showAll: false,
+  districts: loadJSON('ti_districts', defaultDistricts),
+  national: loadJSON('ti_national', true),
+  digestFreq: loadJSON('ti_digest_freq', 'שבועי'),
+  quietOpen: false,
+};
+function loadTracked(){ return loadJSON('ti_tracked', {}); }
+function saveTracked(t){ saveJSON('ti_tracked', t); }
+function loadReminded(){ return loadJSON('ti_reminded', {}); }
+function saveReminded(r){ saveJSON('ti_reminded', r); }
+let tracked = loadTracked();
+let reminded = loadReminded();
+
+function showStub(){
+  const tip = document.getElementById('stub-tip');
+  tip.classList.add('show');
+  setTimeout(() => tip.classList.remove('show'), 1400);
+}
+
+function inScope(o){
+  if (o.region.national) return !!state.national;
+  return !!state.districts[o.region.region];
+}
+
+function scopeInfo(){
+  const picked = META.districts.filter(d => state.districts[d]);
+  const covered = picked.reduce((n, d) => n + (META.districtCounts[d] || 0), 0) + (state.national ? META.nationalCount : 0);
+  const scopeLabel = (picked.length ? picked.join(', ') : 'לא נבחר אזור') + (state.national ? ' + ארצי' : '');
+  return { picked, covered, scopeLabel };
+}
+
+function filteredOpps(){
+  let list = OPPS.filter(inScope);
+  if (state.filter === 'value2m') list = list.filter(o => parseFloat(o.value) >= 2000000);
+  if (state.filter === 'conf60') list = list.filter(o => o.conf >= 60);
+  return list;
+}
+
+const NAV_ITEMS = [
+  { k: 'הזדמנויות', route: 'feed' },
+  { k: 'מעקב', route: 'digest' },
+  { k: 'לקוחות שלי', route: 'clients' },
+  { k: 'הגדרות', route: 'settings' },
+];
+
+function renderNav(){
+  const trackedCount = Object.values(tracked).filter(Boolean).length;
+  document.getElementById('nav').innerHTML = NAV_ITEMS.map(n => {
+    const active = state.route === n.route;
+    const badge = n.route === 'digest' ? String(trackedCount ? 0 : '') : '';
+    return `<span class="tab" data-route="${n.route}" style="font-weight:${active ? 600 : 400}; color:${active ? 'var(--ink)' : 'var(--ink-soft)'}; border-bottom-color:${active ? 'var(--pd)' : 'transparent'}">${n.k}${badge !== '' ? `<span class="count">${badge}</span>` : ''}</span>`;
+  }).join('');
+  [...document.querySelectorAll('#nav .tab')].forEach(el => {
+    el.onclick = () => { state.route = el.dataset.route; render(); window.scrollTo({top:0, behavior:'smooth'}); };
+  });
+}
+
+function render(){
+  ['feed','dossier','digest','settings','clients'].forEach(r => {
+    document.getElementById('screen-' + r).hidden = state.route !== r;
+  });
+  renderNav();
+  const scope = scopeInfo();
+  document.getElementById('header-scope').textContent = scope.scopeLabel;
+  if (state.route === 'feed') renderFeed();
+  else if (state.route === 'dossier') renderDossier();
+  else if (state.route === 'digest') renderDigest();
+  else if (state.route === 'settings') renderSettings();
+}
+
+function renderFeed(){
+  const all = filteredOpps();
+  const visible = state.showAll ? all : all.filter(o => o.conf >= 50);
+  const hiddenCount = all.length - visible.length;
+
+  document.getElementById('feed-title').textContent = `${visible.length} הזדמנויות מתגבשות`;
+  const scope = scopeInfo();
+  document.getElementById('feed-scope-label').textContent = scope.scopeLabel;
+  document.getElementById('feed-goto-settings').onclick = () => { state.route = 'settings'; render(); window.scrollTo({top:0, behavior:'smooth'}); };
+
+  const filters = [
+    { key: 'all', t: 'הכל' },
+    { key: 'value2m', t: 'מעל ₪2M' },
+    { key: 'conf60', t: 'ביטחון 60%+' },
+  ];
+  document.getElementById('filters').innerHTML = filters.map(f =>
+    `<span class="filter-chip ${state.filter === f.key ? 'active' : ''}" data-filter="${f.key}">${f.t}</span>`
+  ).join('');
+  [...document.querySelectorAll('.filter-chip')].forEach(el => {
+    el.onclick = () => { state.filter = el.dataset.filter; render(); };
+  });
+
+  document.getElementById('feed-rows').innerHTML = visible.map(o => {
+    const sc = STAGE_COLORS[o.stageKind] || STAGE_COLORS.neutral;
+    const val = fmtAmount(o.value);
+    const isTracked = !!tracked[o.id];
+    const r = o.region;
+    const regionLabel = r.national ? 'ארצי' : (r.certainty === 'משוער' ? r.region + ' · משוער' : r.region);
+    const regionApprox = !r.national && r.certainty === 'משוער';
+    return `
+    <div class="feed-row" data-id="${o.id}">
+      <div class="lead">
+        <span class="t">${o.name}</span>
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap">
+          <span class="s">${o.body} · ספק מחזיק: ${o.holder}</span>
+          <span class="region-tag ${regionApprox ? 'approx' : ''}">${regionLabel}</span>
+        </div>
+      </div>
+      <span class="stage-pill" style="color:${sc.fg}"><span class="dot" style="background:${sc.dot}"></span>${o.stage}</span>
+      <span class="win-cell">${o.window}</span>
+      <div class="conf-cell">
+        <span class="n ltr">${o.conf}%</span>
+        <span class="conf-track"><span class="conf-fill" style="width:${o.conf}%; background:${sc.dot}"></span></span>
+      </div>
+      <span class="val-cell ltr">${val || '—'}</span>
+      <span class="track-cell">${isTracked ? '✓ במעקב' : ''}</span>
+    </div>`;
+  }).join('');
+  [...document.querySelectorAll('.feed-row')].forEach(el => {
+    el.onclick = () => { state.route = 'dossier'; state.sel = el.dataset.id; state.whyOpen = true; render(); window.scrollTo({top:0, behavior:'smooth'}); };
+  });
+
+  document.getElementById('feed-footnote').textContent = hiddenCount > 0
+    ? `${hiddenCount} הזדמנויות נוספות בביטחון מתחת ל-50% — מוסתרות כברירת מחדל`
+    : 'כל ההזדמנויות שזוהו מוצגות';
+  document.getElementById('feed-showall').textContent = state.showAll ? 'הצג רק 50%+' : 'הצג הכל';
+  document.getElementById('feed-showall').onclick = () => { state.showAll = !state.showAll; render(); };
+}
+
+function renderDossier(){
+  const o = OPPS.find(x => x.id === state.sel) || OPPS[0];
+  const sc = STAGE_COLORS[o.stageKind] || STAGE_COLORS.neutral;
+  const isTracked = !!tracked[o.id];
+  const isReminded = !!reminded[o.id];
+  const val = fmtAmount(o.value);
+
+  document.getElementById('crumb-body').textContent = o.body;
+  document.getElementById('crumb-code').textContent = o.code;
+
+  const trackBarHtml = o.track.map(t => `
+    <div class="track-seg" style="flex:${t.flex}">
+      <div class="bar" style="background:${TRACK_COLORS[t.kind] || TRACK_COLORS.neutral}"></div>
+      <span class="lbl" style="color:${t.kind === 'blue' ? STAGE_COLORS.blue.fg : t.kind === 'amber' ? STAGE_COLORS.amber.fg : '#6a706e'}">${t.label}</span>
+      <span class="dt ltr">${t.date}</span>
+    </div>`).join('');
+
+  const statCards = [
+    { k: o.gapFlag ? 'סטטוס' : 'תום תקופה מאושרת', v: o.gapFlag ? 'ללא רישום המשך' : o.window.split('–').pop(), sub: o.gapFlag ? 'לא נמצא רישום חדש' : 'מחושב מהרישום האחרון' },
+    { k: 'ביטחון בחלון', v: o.conf + '%', sub: `${o.why.length} אות/ות פומבי/ים` },
+    { k: 'היקף (רישום אחרון)', v: val || 'לא פורסם', sub: 'ספק מחזיק: ' + o.holder },
+    { k: 'ימים להיערכות', v: String(o.daysToAct), sub: o.gapFlag ? 'החלון פתוח כעת' : 'עד פתיחת החלון המשוער' },
+  ];
+
+  const whyItemsHtml = o.why.map(w => `
+    <div class="why-item">
+      <span class="n">${w.n}</span>
+      <div class="body">
+        <span class="t">${w.t}</span>
+        <span class="d">${w.d}</span>
+        <span class="src">${w.src}</span>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('dossier-body').innerHTML = `
+    <div class="dossier-head">
+      <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap">
+        <span class="stage-chip" style="background:${sc.chipBg}; color:${sc.chipFg}"><span class="dot" style="background:${sc.dot}"></span>שלב ${o.stageStep} מ-5 · ${o.stage}</span>
+        <span class="dossier-updated">${o.updated}</span>
+      </div>
+      <h1>שירותי ניקיון של <span class="mark">${o.headlineMark}</span>${o.headlineB}</h1>
+      <p class="dossier-basis">${o.basis} <strong style="font-weight:600; color:var(--ink)">תחזית, לא הבטחה.</strong></p>
+    </div>
+
+    <div class="stat-grid">
+      ${statCards.map(c => `<div class="stat-card"><span class="k">${c.k}</span><span class="v ltr">${c.v}</span><span class="sub">${c.sub}</span></div>`).join('')}
+    </div>
+
+    <div class="dossier-grid">
+      <div class="col-main">
+        <div style="display:flex; flex-direction:column; gap:12px">
+          <span class="tl-label">ציר הזמן</span>
+          <div class="track-bar">${trackBarHtml}</div>
+        </div>
+
+        <div class="why-card">
+          <div class="why-top">
+            <div class="why-title">
+              <span class="t">למה אנחנו חושבים כך</span>
+              <span class="why-badge">${o.why.length} אותות · ביטחון ${o.conf}%</span>
+            </div>
+            <button class="why-toggle" id="why-toggle">${state.whyOpen ? 'סגור' : 'הרחב ראיות'}</button>
+          </div>
+          <div class="why-body" ${state.whyOpen ? '' : 'hidden'}>
+            ${whyItemsHtml}
+            <span class="why-missing">${o.missing}</span>
+          </div>
+        </div>
+
+        <div class="changes-card">
+          <div class="head">
+            <span class="t">מה השתנה</span>
+            <span class="since">מבוסס על תמונת מצב יחידה</span>
+          </div>
+          <div class="changes-empty">
+            <span class="t">טרם נצפה שינוי — זו הצפייה הראשונה</span>
+            <span class="d">התיק הוקם מתוך תמונת מצב אחת (7 באוגוסט 2026). יומן שינויים אמיתי דורש להשוות בין כמה משיכות נתונים לאורך זמן — הוא ייפתח אוטומטית לאחר שתתבצע המשיכה הבאה ותימצא תמונת מצב שנייה להשוואה.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-side">
+        <div class="facts-card">
+          <span class="t">החוזה הקיים</span>
+          ${o.facts.map(f => `<div class="fact-row"><span class="k">${f.k}</span><span class="v ltr">${f.v}</span></div>`).join('')}
+          <span class="facts-note">כל השדות נגזרים מרישום פומבי יחיד לכל היותר. אין עדיין קישור למקור המקורי — מתוכנן.</span>
+        </div>
+
+        <div class="action-card" style="background:${isTracked ? sc.chipBg : '#fff'}; border:1px solid ${isTracked ? '#d9dcea' : '#e8e8e4'}">
+          <span class="t" style="color:${isTracked ? sc.chipFg : 'var(--ink)'}">${isTracked ? 'החוזה במעקב' : 'היערכות מומלצת'}</span>
+          <span class="note">${isTracked ? 'נעדכן אותך בכל שינוי שלב או אות חדש — כולל פרסום בפועל, ברגע שיש לנו יותר ממשיכת נתונים אחת.' : 'להתחיל בבירור כוח אדם, ערבויות ותיק סף מוקדם — אלה לוקחים בדרך כלל שבועות.'}</span>
+          <button id="btn-track" style="color:${isTracked ? sc.fg : '#fff'}; background:${isTracked ? '#fff' : sc.dot}; border:1px solid ${isTracked ? sc.dot : sc.dot}">${isTracked ? '✓ במעקב — הסר' : 'הוסף למעקב'}</button>
+          <button class="remind" id="btn-remind">${isReminded ? '✓ תזכורת נקבעה' : 'הזכר לי לקראת החלון'}</button>
+          <button class="share" id="btn-share">שתף עם הצוות</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('back-to-feed').onclick = () => { state.route = 'feed'; render(); window.scrollTo({top:0, behavior:'smooth'}); };
+  document.getElementById('why-toggle').onclick = () => { state.whyOpen = !state.whyOpen; render(); };
+  document.getElementById('btn-track').onclick = () => {
+    tracked[o.id] = !tracked[o.id]; saveTracked(tracked); render();
+  };
+  document.getElementById('btn-remind').onclick = () => {
+    reminded[o.id] = !reminded[o.id]; saveReminded(reminded); render();
+  };
+  document.getElementById('btn-share').onclick = async () => {
+    const url = new URL(location.href); url.searchParams.set('o', o.id);
+    try {
+      if (navigator.share) await navigator.share({ title: o.name, url: url.toString() });
+      else { await navigator.clipboard.writeText(url.toString()); alert('הקישור הועתק'); }
+    } catch(e) {}
+  };
+}
+
+function renderDigest(){
+  const trackedIds = OPPS.filter(o => tracked[o.id]).map(o => o.id);
+  document.getElementById('digest-title').textContent = 'מה השתנה';
+  document.getElementById('digest-sub').textContent =
+    `${trackedIds.length} חוזים במעקב · מבוסס על תמונת מצב יחידה (7 באוגוסט 2026)`;
+
+  document.getElementById('digest-freqs').innerHTML = ['יומי','שבועי'].map(f => `
+    <span class="freq-chip" data-freq="${f}" style="background:${state.digestFreq===f?'var(--ink)':'#fff'}; color:${state.digestFreq===f?'#fff':'var(--ink-soft)'}; border:1px solid ${state.digestFreq===f?'var(--ink)':'var(--line-3)'}; cursor:pointer">${f}</span>`).join('');
+  [...document.querySelectorAll('.freq-chip')].forEach(el => {
+    el.onclick = () => { state.digestFreq = el.dataset.freq; saveJSON('ti_digest_freq', state.digestFreq); render(); };
+  });
+
+  let body = '';
+  if (trackedIds.length === 0){
+    body = `
+    <div class="digest-section">
+      <span class="digest-label">דורש תשומת לב</span>
+      <div class="digest-empty">
+        <span class="t">אין עדיין חוזים במעקב</span>
+        <span class="d">הוסיפו חוזה למעקב מתוך התיק שלו כדי לקבל כאן עדכונים כשיהיה מה לדווח.</span>
+      </div>
+    </div>`;
+  } else {
+    body = `
+    <div class="digest-section">
+      <span class="digest-label">דורש תשומת לב</span>
+      <div class="digest-empty">
+        <span class="t">אין עדיין נתוני שינוי להצגה</span>
+        <span class="d">${trackedIds.length} החוזים במעקב מבוססים כרגע על תמונת מצב אחת בלבד (7 באוגוסט 2026). לא בוצעה עדיין משיכה חוזרת שממנה אפשר להפיק השוואה — התקציר הזה יתמלא אוטומטית ברגע שתהיה תמונת מצב שנייה להשוואה מולה. המעקב פעיל.</span>
+      </div>
+    </div>`;
+  }
+
+  document.getElementById('digest-body').innerHTML = body;
+  document.getElementById('digest-goto-settings').onclick = () => { state.route = 'settings'; render(); window.scrollTo({top:0, behavior:'smooth'}); };
+}
+
+function renderSettings(){
+  const scope = scopeInfo();
+
+  const districtChips = META.districts.map(d => {
+    const on = !!state.districts[d];
+    return `<span class="district-chip" data-district="${d}" style="background:${on?'var(--ink)':'#fff'}; color:${on?'#fff':'#5b6260'}; border:1px solid ${on?'var(--ink)':'var(--line-3)'}">${on?'✓ ':''}${d} <span class="ltr" style="opacity:.7; font-size:12px">(${META.districtCounts[d]||0})</span></span>`;
+  }).join('');
+
+  const buyers = {};
+  OPPS.forEach(o => { if (!buyers[o.body]) buyers[o.body] = o.region; });
+  const lookupRows = Object.entries(buyers).map(([body, r]) => {
+    const tag = r.national ? 'ארצי' : `${r.region} · ${r.certainty}`;
+    const approx = !r.national && r.certainty === 'משוער';
+    return `<div class="lookup-row">
+      <span class="body">${body}</span>
+      <span class="tag" style="color:${approx?'var(--af)':'var(--ink-soft)'}; background:${approx?'var(--ab)':'var(--surface-2)'}; border:${approx?'1px dashed var(--ad)':'1px solid var(--line-2)'}">${tag}</span>
+      <span class="src">${r.src}</span>
+    </div>`;
+  }).join('');
+
+  document.getElementById('settings-grid').innerHTML = `
+    <div class="settings-col">
+      <div class="settings-card">
+        <span class="t">מחוזות</span>
+        <div class="district-row" id="district-row">${districtChips}</div>
+        <div class="national-row">
+          <div class="body">
+            <span class="t2">גופים ארציים</span>
+            <span class="d">משרדי ממשלה ורשויות שאינן משויכות למחוז אחד (למשל משרד הבריאות, משטרת ישראל). אם תסירו אותם, ${META.nationalCount} חוזים ייצאו מהניטור.</span>
+          </div>
+          <span class="national-toggle" id="toggle-national" style="background:${state.national?'var(--pb)':'#fff'}; color:${state.national?'var(--p)':'#5b6260'}; border:1px solid ${state.national?'#d9dcea':'var(--line-3)'}">${state.national ? '✓ כלול' : 'לא כלול'}</span>
+        </div>
+        <div class="scope-summary">
+          <span class="t">היקף נוכחי: ${scope.scopeLabel}</span>
+          <span class="d">${scope.covered === 0
+            ? 'אין מחוז מסומן והגופים הארציים לא כלולים — הניטור אינו מכסה אף חוזה.'
+            : `ההיקף הנוכחי מכסה ${scope.covered} מתוך ${META.totalOpportunities} הזדמנויות ניקיון שזוהו במאגר · ${META.nationalCount} מהן גופים ארציים ${state.national ? '(כלולים)' : '(לא כלולים)'}.`}</span>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <div class="lookup-head">
+          <span class="t">שיוך מזמינים למחוז</span>
+          <span class="note">כל שיוך נושא מקור ורמת ודאות</span>
+        </div>
+        <div class="lookup-cols"><span>מזמין</span><span>שיוך</span><span>מקור השיוך</span></div>
+        ${lookupRows}
+        <span class="lookup-note">שיוך המסומן <strong style="color:var(--af)">משוער</strong> נגזר מכתובת מטה ידועה, לא מרישום רשמי לכל התקשרות. רוב המזמינים במאגר הנוכחי הם גופים ארציים ללא מחוז יחיד — ${META.nationalCount} מתוך ${META.totalOpportunities} הזדמנויות.</span>
+      </div>
+    </div>
+
+    <div class="settings-col">
+      <div class="settings-card">
+        <span class="t">מה נשלח אליכם</span>
+        <div class="notif-row"><span class="t">תקציר ${state.digestFreq} של שינויים במעקב</span><span class="state" style="color:var(--p)">פעיל</span></div>
+        <div class="notif-row"><span class="t">התראה מיידית: עלייה בשלב מחזור־חיים</span><span class="state" style="color:var(--p)">פעיל</span></div>
+        <div class="notif-row" style="border-bottom:0"><span class="t" style="color:var(--ink-mute)">התראה על כל שינוי ביטחון (גם קטן)</span><span class="state" style="color:var(--ink-mute)">כבוי</span></div>
+        <span class="lookup-note">בדיקות שלא הניבו אות חדש אינן נשלחות כהתראה, אלא נספרות בתקציר — כדי שהשקט יהיה מדיד ולא רועש.</span>
+      </div>
+      <div class="settings-card" style="background:var(--surface-2)">
+        <span class="t">תחום</span>
+        <span class="lookup-note">ניקיון ואחזקת מבנים. תחומים נוספים (הסעדה, שמירה, גינון) ייפתחו לפי סדר בקשות הלקוחות.</span>
+        <span class="scope-line change" id="request-domain" style="width:fit-content">בקשו תחום</span>
+      </div>
+    </div>
+  `;
+
+  [...document.querySelectorAll('.district-chip')].forEach(el => {
+    el.onclick = () => {
+      state.districts[el.dataset.district] = !state.districts[el.dataset.district];
+      saveJSON('ti_districts', state.districts);
+      render();
+    };
+  });
+  document.getElementById('toggle-national').onclick = () => {
+    state.national = !state.national; saveJSON('ti_national', state.national); render();
+  };
+  document.getElementById('request-domain').onclick = showStub;
+  document.getElementById('settings-save').onclick = showStub;
+}
+
+document.getElementById('dossier-pdf').onclick = () => window.print();
+document.getElementById('clients-back').onclick = () => { state.route = 'feed'; render(); window.scrollTo({top:0, behavior:'smooth'}); };
+
+const params = new URLSearchParams(location.search);
+const preId = params.get('o');
+if (preId && OPPS.some(o => o.id === preId)) { state.route = 'dossier'; state.sel = preId; }
+
+render();
+</script>

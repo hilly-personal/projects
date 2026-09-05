@@ -1,0 +1,6 @@
+data/raw/
+*.zip
+*.xls
+*.xlsx
+.DS_Store
+.superset/

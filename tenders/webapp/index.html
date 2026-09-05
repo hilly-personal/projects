@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>תדרוך מודיעין ציבורי — רכש ממשלתי</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header>
+  <h1>גלו את ההזדמנות הממשלתית הבאה שלכם — לפני שהיא הופכת למכרז פומבי</h1>
+  <p class="tagline">הזינו שם של כל חברת ניקיון או אחזקה שמתמודדת מול המגזר הממשלתי, ונציג את הפרופיל הציבורי שלה — כולל סימנים מוקדמים שמעידים על הזדמנות שעוד לא פורסמה כמכרז. ככה גם אתם יכולים להגיע ראשונים. פרטי הזיהוי המלאים זמינים בהתחברות חינמית.</p>
+</header>
+
+<div class="search-wrap">
+  <div class="search-box">
+    <input id="q" type="text" placeholder="שם חברה או ח.פ׳..." autocomplete="off">
+    <button id="go">חפשו</button>
+  </div>
+  <div class="search-hint">המאגר מכסה כרגע חברות עם רישומי ניקיון/אחזקה פומביים שזיהינו אוטומטית — לא כל חברה תימצא.</div>
+  <div id="suggest" class="suggest" hidden></div>
+</div>
+
+<div id="account-status" class="account-status" hidden>
+  <span class="auth-label">מחוברים כ-<span id="auth-user-email" class="ltr"></span></span>
+  <button id="auth-signout" class="icon-btn">התנתקו</button>
+</div>
+
+<div id="auth-modal" class="modal-overlay" hidden>
+  <div class="modal-card">
+    <button id="auth-modal-close" class="modal-close" aria-label="סגירה">✕</button>
+    <div class="modal-icon">👁</div>
+    <h3>זה מה שמחכה לכם בפנים</h3>
+    <p class="auth-label">התחברות מהירה וחינמית פותחת את פרטי הזיהוי המלאים — גורם מזמין, תאריכים, סכומים — לכל חברה שתחפשו.</p>
+    <div class="auth-row">
+      <input id="auth-email" type="email" placeholder="האימייל שלכם" autocomplete="email">
+      <button id="auth-submit">שלחו קישור התחברות</button>
+    </div>
+    <div id="auth-sent" class="auth-sent" hidden>שלחנו קישור התחברות ל<span id="auth-sent-email" class="ltr"></span> — בדקו את תיבת המייל.</div>
+  </div>
+</div>
+
+<div id="quadrant-lightbox" class="modal-overlay" hidden>
+  <div class="modal-card lightbox-card">
+    <button id="quadrant-lightbox-close" class="modal-close" aria-label="סגירה">✕</button>
+    <div class="section-label">מפת השחקנים בתחום</div>
+    <div id="quadrant-lightbox-content"></div>
+  </div>
+</div>
+
+<div id="empty">
+  <section id="showcase-section">
+    <div class="section-label">ראו דוח מלא לדוגמה (ללא הרשמה)</div>
+    <div class="showcase-chips" id="showcase-chips"></div>
+  </section>
+  <div class="examples" id="examples"></div>
+  <div class="stat-strip" id="empty-stats"></div>
+  <section>
+    <div class="section-label">כמה מהחוזים שאנחנו עוקבים אחריהם עכשיו</div>
+    <div id="empty-opps"><div class="loading">טוען…</div></div>
+  </section>
+  <section>
+    <div class="section-label">מפת השחקנים בתחום</div>
+    <div id="empty-share"><div class="loading">טוען…</div></div>
+  </section>
+</div>
+
+<div id="nomatch" hidden>
+  <div class="nomatch">
+    <p><strong>לא מצאנו רישום תחת השם הזה במאגר שלנו כרגע.</strong> זה מבוסס על סינון שמרני (המונח "ניקיון" ברישומי פטורים ממכרז) — זה לא אומר שלחברה הזו אין היסטוריה ציבורית, רק שעדיין לא זיהינו אותה אוטומטית. נשמח לבדוק ידנית.</p>
+    <div class="leave-info">
+      <input id="nm-name" type="text" placeholder="שם החברה">
+      <input id="nm-contact" type="text" placeholder="טלפון או אימייל">
+      <button id="nm-submit">שלחו לבדיקה</button>
+    </div>
+    <p id="nm-thanks" hidden style="margin-top:12px; color:var(--accent); font-weight:600">תודה! נחזור אליכם.</p>
+  </div>
+</div>
+
+<div id="report" hidden></div>
+
+<footer>
+  <span>מבוסס אך ורק על רישומים פומביים מפורסמים של רשות החשבות הכללית. אינו מהווה ייעוץ משפטי, המלצה להגשת הצעה, או ערובה לתוצאה כלשהי.</span>
+  <span class="ltr no-print">v2 · webapp</span>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

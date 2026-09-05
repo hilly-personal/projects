@@ -1,0 +1,42 @@
+name: Refresh government procurement data
+
+on:
+  schedule:
+    # Weekly (mr.gov.il updates monthly — this gives margin without hammering their server).
+    # Cron is UTC; 03:00 UTC ≈ overnight in Israel.
+    - cron: "0 3 * * 1"
+  workflow_dispatch: {} # lets you trigger a manual run from the Actions tab
+
+defaults:
+  run:
+    # This is a multi-project repo — everything for Tender Intelligence lives under tenders/.
+    # GitHub only recognizes workflow files at the repo root (.github/workflows/), which is why
+    # this file itself is NOT under tenders/ even though everything it runs is.
+    working-directory: tenders
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run full refresh pipeline
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python3 src/pipeline/refresh_all.py
+
+      - name: Commit regenerated data files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add app/companies.json data/processed/companies_*.json data/processed/exemptions_classified.parquet webapp/name_index.json webapp/showcase.json
+          git diff --staged --quiet || git commit -m "Automated data refresh $(date -u +%Y-%m-%d)"
+          git push
