@@ -9,35 +9,118 @@
 </head>
 <body>
 
-<header>
-  <h1>גלו את ההזדמנות הממשלתית הבאה שלכם — לפני שהיא הופכת למכרז פומבי</h1>
-  <p class="tagline">הזינו שם של כל חברה שמתמודדת מול המגזר הממשלתי, ונציג את הפרופיל הציבורי שלה — כולל סימנים מוקדמים שמעידים על הזדמנות שעוד לא פורסמה כמכרז. ככה גם אתם יכולים להגיע ראשונים. פרטי הזיהוי המלאים זמינים בהתחברות חינמית.</p>
-</header>
+<div id="onboarding-firstrun" dir="rtl" hidden>
+  <div class="fr-grid">
+    <div class="fr-main">
+      <div class="fr-eyebrow">SETUP · 01 / 03</div>
+      <h1 class="fr-h1">אחרי מה<br>אתם רודפים?</h1>
 
-<div id="scope-bar" class="scope-bar" hidden>
-  <span class="scope-label">מציגים: <b id="scope-summary"></b></span>
-  <button id="scope-change" class="icon-btn">שנו סינון</button>
+      <div class="fr-step" id="fr-step-cats">
+        <div class="fr-step-head">
+          <span class="fr-step-num">01</span>
+          <div><div class="fr-step-title">קטגוריות</div><div class="fr-step-sub">בחירה מרובה</div></div>
+        </div>
+        <div class="fr-chips" id="fr-cats"></div>
+      </div>
+
+      <div class="fr-step fr-locked" id="fr-step-dists">
+        <div class="fr-divider"></div>
+        <div class="fr-step-head">
+          <span class="fr-step-num">02</span>
+          <div><div class="fr-step-title">אזור</div><div class="fr-step-sub">מצפון לדרום · «ארצי» לגופים בלי אזור</div></div>
+        </div>
+        <div class="fr-chips" id="fr-dists"></div>
+      </div>
+
+      <div class="fr-step fr-locked" id="fr-step-sizes">
+        <div class="fr-divider"></div>
+        <div class="fr-step-head">
+          <span class="fr-step-num">03</span>
+          <div><div class="fr-step-title">גודל עסקה</div><div class="fr-step-sub">לפי חוזה</div></div>
+        </div>
+        <div class="fr-rows" id="fr-sizes"></div>
+      </div>
+    </div>
+
+    <div class="fr-panel">
+      <div class="fr-panel-eyebrow">YOUR SCOPE</div>
+      <div>
+        <div class="fr-count" id="fr-count">0</div>
+        <div class="fr-count-label" id="fr-count-label"></div>
+        <div class="fr-meter" id="fr-meter"></div>
+      </div>
+      <div class="fr-hr"></div>
+      <div class="fr-median-row">
+        <span class="fr-median-label" id="fr-median-label">הטווח הנפוץ ביותר בהתאמות</span>
+        <span class="fr-median" id="fr-median">—</span>
+      </div>
+      <div class="fr-hr"></div>
+      <div class="fr-summary" id="fr-summary"></div>
+      <div class="fr-cta-wrap">
+        <button type="button" id="fr-cta" class="fr-cta" disabled>הראו לי את הפיד</button>
+        <div class="fr-hint" id="fr-hint">בחרו קטגוריה אחת לפחות כדי להמשיך</div>
+      </div>
+    </div>
+  </div>
 </div>
 
-<div id="onboarding-modal" class="modal-overlay" hidden>
-  <div class="modal-card onboarding-card">
-    <button id="onboarding-close" class="modal-close" aria-label="סגירה">✕</button>
-    <div class="onboarding-step" data-step="domain">
-      <div class="section-label">באיזה תחום אתם עובדים מול המגזר הממשלתי?</div>
-      <div class="domain-grid" id="domain-grid"></div>
-    </div>
-    <div class="onboarding-step" data-step="location">
-      <div class="section-label">איפה אתם מחפשים הזדמנויות?</div>
-      <div class="onboarding-row">
-        <label class="onboarding-check"><input type="checkbox" id="loc-national" checked><span>כל הארץ / גופים ארציים</span></label>
+<div id="app-shell">
+<div id="feed-chrome" dir="rtl">
+  <div id="feed-sheet-overlay" class="feed-sheet-overlay"></div>
+  <div id="feed-sheet" class="feed-sheet">
+    <div class="feed-sheet-inner">
+      <div class="feed-sheet-head">
+        <div>
+          <div class="feed-sheet-eyebrow">EDIT SCOPE</div>
+          <h2 class="feed-sheet-title">אחרי מה אתם רודפים?</h2>
+        </div>
+        <div class="feed-sheet-stats">
+          <div class="feed-sheet-stat"><span id="feed-sheet-count" class="feed-sheet-num">0</span><span class="feed-sheet-lab">הזדמנויות תואמות</span></div>
+          <div class="feed-sheet-divider"></div>
+          <div class="feed-sheet-stat"><span id="feed-sheet-median" class="feed-sheet-num amber">—</span><span class="feed-sheet-lab">הטווח הנפוץ ביותר</span></div>
+        </div>
       </div>
-      <div class="region-grid" id="region-grid"></div>
+      <div class="feed-sheet-steps">
+        <div>
+          <div class="fr-step-head"><span class="fr-step-num">01</span><div><div class="fr-step-title">קטגוריות</div><div class="fr-step-sub">בחירה מרובה</div></div></div>
+          <div class="fr-chips" id="feed-sheet-cats"></div>
+        </div>
+        <div>
+          <div class="fr-step-head"><span class="fr-step-num">02</span><div><div class="fr-step-title">אזור</div><div class="fr-step-sub">מצפון לדרום · «ארצי» לגופים בלי אזור</div></div></div>
+          <div class="fr-chips" id="feed-sheet-dists"></div>
+        </div>
+        <div>
+          <div class="fr-step-head"><span class="fr-step-num">03</span><div><div class="fr-step-title">גודל עסקה</div><div class="fr-step-sub">שקלים, לפי חוזה</div></div></div>
+          <div class="fr-rows" id="feed-sheet-sizes"></div>
+        </div>
+      </div>
     </div>
-    <div class="onboarding-step" data-step="dealsize">
-      <div class="section-label">אילו גדלי עסקה מעניינים אתכם?</div>
-      <div class="dealsize-grid" id="dealsize-grid"></div>
+    <div class="feed-sheet-footer">
+      <div class="feed-sheet-footer-inner">
+        <span id="feed-sheet-hint" class="feed-sheet-hint"></span>
+        <div class="feed-sheet-actions">
+          <button type="button" id="feed-sheet-cancel" class="feed-sheet-cancel">ביטול</button>
+          <button type="button" id="feed-sheet-apply" class="feed-sheet-apply">החילו את ההיקף</button>
+        </div>
+      </div>
     </div>
-    <button id="onboarding-submit" class="onboarding-submit">הראו לי הזדמנויות</button>
+  </div>
+
+  <div class="feed-nav">
+    <div class="feed-nav-brand"><span class="feed-nav-dot"></span><span>מודיעין רכש</span></div>
+    <div class="feed-nav-tabs" id="feed-nav-tabs"></div>
+  </div>
+  <div class="feed-scopebar">
+    <div class="feed-scope-left">
+      <span class="feed-scope-eyebrow">SCOPE</span>
+      <span id="feed-scope-pills" class="feed-scope-pills"></span>
+      <button type="button" id="feed-scope-change" class="feed-scope-change">שנו סינון</button>
+    </div>
+    <div class="feed-scope-right">
+      <div class="feed-scope-stat"><span id="feed-shown-count" class="feed-scope-num cyan">0</span><span class="feed-scope-lab" id="feed-shown-count-lab">הזדמנויות תואמות</span></div>
+      <div class="feed-scope-divider"></div>
+      <div class="feed-scope-stat"><span id="feed-shown-median" class="feed-scope-num amber">—</span><span class="feed-scope-lab" id="feed-shown-median-lab">הטווח הנפוץ ביותר</span></div>
+    </div>
   </div>
 </div>
 
@@ -83,19 +166,178 @@
     <div class="showcase-chips" id="showcase-chips"></div>
   </section>
   <div class="examples" id="examples"></div>
-  <div class="stat-strip" id="empty-stats"></div>
   <section>
     <div class="section-label">הזדמנויות פתוחות להגשה עכשיו <span id="new-tenders-badge" class="new-tenders-badge" hidden></span></div>
     <div id="open-tenders"><div class="loading">טוען…</div></div>
   </section>
-  <section>
-    <div class="section-label">כמה מהחוזים שאנחנו עוקבים אחריהם עכשיו</div>
-    <div id="empty-opps"><div class="loading">טוען…</div></div>
-  </section>
-  <section>
-    <div class="section-label">מפת השחקנים בתחום</div>
-    <div id="empty-share"><div class="loading">טוען…</div></div>
-  </section>
+
+  <div class="feed-grid">
+    <div class="feed-main">
+      <div class="feed-head">
+        <div>
+          <div class="feed-head-title-row"><h1 class="feed-h1">הזדמנויות פתוחות</h1></div>
+          <p id="feed-last-scan" class="feed-last-scan"></p>
+        </div>
+        <div class="feed-sort">
+          <span class="feed-sort-label">סדרו לפי</span>
+          <div id="feed-sorts" class="feed-sort-tabs"></div>
+        </div>
+      </div>
+      <div id="feed-stage-chips" class="feed-chip-row"></div>
+      <div id="feed-cards" class="feed-cards"></div>
+      <div id="feed-empty" class="feed-empty" hidden>
+        <div class="feed-empty-title">אין הזדמנויות בשילוב הסינון הזה</div>
+        <div class="feed-empty-body">הסינון תקף — פשוט אין רשומה שעונה על כל התנאים בהיקף שבחרתם. נסו להרחיב את טווח השווי או להסיר את מסנן הביטחון.</div>
+        <button type="button" id="feed-empty-reset" class="feed-empty-cta">נקו סינון</button>
+      </div>
+      <div id="feed-gate" class="feed-gate" hidden>
+        <div id="feed-gate-title" class="feed-gate-title"></div>
+        <div id="feed-gate-body" class="feed-gate-body"></div>
+        <button type="button" id="feed-gate-cta" class="feed-gate-cta"></button>
+      </div>
+    </div>
+    <div class="feed-sidebar">
+      <div class="feed-side-card">
+        <div class="feed-side-title">הרדאר שלכם</div>
+        <div id="feed-radar" class="feed-radar"></div>
+      </div>
+      <div class="feed-side-card">
+        <div class="feed-side-title">פיזור שווי ואזור</div>
+        <div id="feed-breakdown" class="feed-breakdown"></div>
+      </div>
+      <div class="feed-changelog">
+        <div class="feed-side-title muted">יומן שינויים</div>
+        <div id="feed-changelog-note" class="feed-changelog-note"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="market-map" hidden>
+  <div class="feed-grid">
+    <div class="feed-main">
+      <div class="feed-head">
+        <div>
+          <h1 class="feed-h1">מפת השחקנים בתחום</h1>
+          <p class="feed-last-scan">כל נקודה היא חברה עם התקשרויות ציבוריות מדווחות בהיקף שבחרתם. הציר האופקי הוא ההיקף המצטבר, האנכי הוא גודל העסקה הטיפוסי — הקווים חוצים בחציון של השוק.</p>
+        </div>
+        <input type="text" id="mm-search" placeholder="חיפוש חברה במפה…" class="mm-search" autocomplete="off">
+      </div>
+      <div id="mm-chips" class="feed-chip-row"></div>
+
+      <div class="mm-card">
+        <div class="mm-plot-wrap" dir="ltr">
+          <div id="mm-plot" class="mm-plot">
+            <span class="mm-zone tr">שולטי השוק</span>
+            <span class="mm-zone tl">מתמחים בעסקאות גדולות</span>
+            <span class="mm-zone br">ספקי נפח</span>
+            <span class="mm-zone bl">שחקנים מקומיים</span>
+            <span class="mm-divider v"></span><span class="mm-divider h"></span>
+            <div id="mm-dots"></div>
+            <div id="mm-tooltip" class="mm-tooltip" hidden></div>
+          </div>
+          <span class="mm-axis-label x">היקף מצטבר של התקשרויות ציבוריות ←</span>
+          <span class="mm-axis-label y">גודל עסקה טיפוסי ←</span>
+        </div>
+        <div class="mm-foot">
+          <div class="mm-legend" id="mm-legend"></div>
+          <span class="mm-caption" id="mm-caption"></span>
+        </div>
+      </div>
+
+      <div id="mm-excluded" class="feed-why" hidden>
+        <span class="feed-why-label">DATA</span>
+        <span class="feed-why-text" id="mm-excluded-text"></span>
+      </div>
+    </div>
+
+    <div class="feed-sidebar">
+      <div id="mm-panel" class="mm-panel" hidden></div>
+      <div id="mm-leaders-card" class="feed-side-card">
+        <div class="feed-side-title">עשירייה מובילה בהיקף</div>
+        <div id="mm-leaders" class="mm-leaders"></div>
+      </div>
+      <div class="feed-changelog">
+        <div class="feed-side-title muted">איך לקרוא את המפה</div>
+        <div class="feed-changelog-note">ימין = יותר כסף בסך הכול. מעלה = עסקאות בודדות גדולות יותר. חברה בפינה הימנית-תחתונה מנצחת בנפח של חוזים קטנים; בפינה השמאלית-עליונה — בפרויקטים בודדים גדולים. הצלבה עם פערי המשך מראה מי מהם עומד מול חלון פקיעה כרגע.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="dossier" hidden>
+  <div class="ds-subbar">
+    <div class="ds-crumb">
+      <a href="#" id="ds-back">← חזרה לפיד</a>
+      <span class="ds-sep">/</span>
+      <span class="ds-code" id="ds-code"></span>
+    </div>
+    <div class="ds-actions">
+      <button type="button" class="ds-navbtn" id="ds-prev">הקודמת</button>
+      <span class="ds-position" id="ds-position"></span>
+      <button type="button" class="ds-navbtn" id="ds-next">הבאה</button>
+      <span class="ds-divider"></span>
+      <button type="button" class="ds-ghost" id="ds-track-btn">הוסיפו למעקב</button>
+      <button type="button" class="ds-ghost" id="ds-share-btn">שתפו</button>
+      <button type="button" class="ds-primary" id="ds-cta"></button>
+    </div>
+  </div>
+
+  <div class="ds-wrap">
+    <div class="ds-hero">
+      <div class="ds-hero-top">
+        <span class="ds-stage" id="ds-stage"></span>
+        <span class="ds-region" id="ds-region"></span>
+        <span class="ds-updated" id="ds-updated"></span>
+      </div>
+      <h1 class="ds-name" id="ds-name"></h1>
+      <p class="ds-headline" id="ds-headline"></p>
+      <div class="ds-metrics">
+        <div class="ds-metric ds-dial-wrap">
+          <div class="ds-dial">
+            <svg viewBox="0 0 66 66" class="ds-dial-svg"><circle cx="33" cy="33" r="28" class="ds-dial-track"></circle><circle cx="33" cy="33" r="28" class="ds-dial-fill" id="ds-dial-fill"></circle></svg>
+            <span class="ds-dial-text" id="ds-dial-text"></span>
+          </div>
+          <div><div class="feed-metric-label">ביטחון בזיהוי</div><div class="ds-basis" id="ds-basis"></div></div>
+        </div>
+        <div class="ds-vdiv"></div>
+        <div class="ds-metric"><div class="feed-metric-label">שווי מוערך</div><div id="ds-value"></div></div>
+        <div class="ds-metric"><div class="feed-metric-label">חלון פעולה</div><span class="ds-window" id="ds-window"></span></div>
+        <div class="ds-vdiv"></div>
+        <div class="ds-metric"><div class="feed-metric-label">מול חציון הקטגוריה</div><div id="ds-rel"></div></div>
+      </div>
+    </div>
+
+    <div class="ds-card">
+      <div class="ds-section-label">ציר ההתקשרות</div>
+      <div class="ds-track-bars" id="ds-track-bars"></div>
+      <div class="ds-track-labs" id="ds-track-labs"></div>
+    </div>
+
+    <div class="ds-card">
+      <div class="ds-card-head"><div class="ds-section-label">למה אנחנו חושבים כך</div><span class="ds-hint">כל טענה מקושרת למספר הליך פומבי</span></div>
+      <div class="ds-signals" id="ds-signals"></div>
+      <div class="ds-why" id="ds-why"></div>
+    </div>
+
+    <div class="ds-card">
+      <div class="ds-section-label">עובדות מהרישום הפומבי</div>
+      <div class="ds-facts" id="ds-facts"></div>
+    </div>
+
+    <div class="ds-card">
+      <div class="ds-card-head"><div class="ds-section-label">מה שהשתנה</div><span class="ds-hint mono" id="ds-scanline"></span></div>
+      <div class="ds-changelog">
+        <span class="ds-changelog-dot"></span>
+        <div><div class="ds-changelog-title">נצפה פעם אחת בלבד</div><div class="ds-changelog-note" id="ds-changenote"></div></div>
+      </div>
+    </div>
+
+    <div class="ds-gaps">
+      <span class="ds-gaps-label">GAPS</span>
+      <div><div class="ds-gaps-title">מה עדיין לא זמין</div><div class="ds-gaps-note" id="ds-missing"></div></div>
+    </div>
+  </div>
 </div>
 
 <div id="nomatch" hidden>
@@ -116,6 +358,7 @@
   <span>מבוסס אך ורק על רישומים פומביים מפורסמים של רשות החשבות הכללית. אינו מהווה ייעוץ משפטי, המלצה להגשת הצעה, או ערובה לתוצאה כלשהי.</span>
   <span class="ltr no-print">v2 · webapp</span>
 </footer>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="config.js"></script>
