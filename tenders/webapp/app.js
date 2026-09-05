@@ -53,6 +53,23 @@ function loadScope(){
 }
 function saveScope(scope){ try { localStorage.setItem('ti_scope', JSON.stringify(scope)); } catch(e) {} }
 
+// Signed-in users get their scope persisted server-side (user_scopes table) so the weekly
+// digest can be sent to them independent of whether they're currently browsing — localStorage
+// alone can't do that. Anonymous visitors keep the localStorage-only behavior above unchanged.
+async function loadServerScope(){
+  if (!session) return null;
+  const { data, error } = await sb.from('user_scopes').select('*').eq('user_id', session.user.id).maybeSingle();
+  if (error || !data) return null;
+  return { category: data.category, districts: data.districts, includeNational: data.include_national, dealSizes: data.deal_sizes };
+}
+async function saveServerScope(scope){
+  if (!session) return;
+  await sb.from('user_scopes').upsert({
+    user_id: session.user.id, category: scope.category, districts: scope.districts,
+    include_national: scope.includeNational, deal_sizes: scope.dealSizes, updated_at: new Date().toISOString(),
+  });
+}
+
 let SCOPE = loadScope();
 function currentCategory(){ return (SCOPE || DEFAULT_SCOPE).category; }
 
@@ -644,9 +661,18 @@ function wireAuth(){
   document.getElementById('quadrant-lightbox-close').onclick = closeQuadrantLightbox;
   document.getElementById('quadrant-lightbox').addEventListener('click', (e) => { if (e.target.id === 'quadrant-lightbox') closeQuadrantLightbox(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape'){ closeAuthModal(); closeQuadrantLightbox(); } });
-  sb.auth.onAuthStateChange((_event, newSession) => {
+  sb.auth.onAuthStateChange(async (_event, newSession) => {
     session = newSession;
     renderAuthState();
+    if (session){
+      // reconcile server vs local scope: server wins if it exists (it's what the digest
+      // pipeline reads), otherwise push whatever local scope exists up as this account's
+      // first server-side scope.
+      const serverScope = await loadServerScope();
+      if (serverScope){ SCOPE = serverScope; saveScope(SCOPE); }
+      else if (SCOPE){ await saveServerScope(SCOPE); }
+      if (SCOPE) renderScopeBar();
+    }
     // re-render whatever's currently on screen with the new auth level
     if (currentReportId) renderReport(currentReportId);
     else renderEmptyState();
@@ -776,12 +802,13 @@ function wireOnboarding(){
   });
   document.getElementById('onboarding-close').onclick = closeOnboarding;
   document.getElementById('onboarding-modal').addEventListener('click', e => { if (e.target.id === 'onboarding-modal') closeOnboarding(); });
-  document.getElementById('onboarding-submit').onclick = () => {
+  document.getElementById('onboarding-submit').onclick = async () => {
     draft.includeNational = document.getElementById('loc-national').checked;
     draft.districts = [...document.querySelectorAll('#region-grid input:checked')].map(el => el.value);
     draft.dealSizes = [...document.querySelectorAll('#dealsize-grid input:checked')].map(el => parseInt(el.value, 10));
     SCOPE = draft;
     saveScope(SCOPE);
+    if (session) await saveServerScope(SCOPE);
     closeOnboarding();
     renderScopeBar();
     currentReportId = null;

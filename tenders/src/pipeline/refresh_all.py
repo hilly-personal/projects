@@ -47,6 +47,16 @@ def main():
     run(sys.executable, "webapp/scripts/build_showcase.py")
     run(sys.executable, "webapp/scripts/load_data.py")
 
+    # change detection needs the data already live in Supabase (it diffs against
+    # company_snapshots, not the local files), so this runs after load_data.py, per category.
+    for category in VALIDATED_CATEGORIES:
+        out = "app/companies.json" if category == "cleaning" else f"data/processed/companies_{category}.json"
+        run(sys.executable, "src/pipeline/detect_changes.py", category, out)
+
+    # digest sending is a no-op (prints and returns) until RESEND_API_KEY is actually set as a
+    # secret — safe to always run.
+    run(sys.executable, "src/pipeline/send_digests.py")
+
     print("Refresh complete.")
 
 
