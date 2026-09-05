@@ -15,6 +15,8 @@ this — worth resolving before treating competitor-claim items as settled fact)
   — **Partially built**: weekly change-detection + email digest pipeline is coded and wired to a real Resend account (`src/pipeline/detect_changes.py` + `send_digests.py`), verified against a real first snapshot in production. Still needs a second real week-over-week run to prove an actual diff-triggered email end-to-end. No SMS/push.
 - [ ] Structured, filterable premium fields: budget/financial scope, contractor license tier, document cost, location — done as real filters, not a locked "field exists" teaser
   — Location and deal-size-quartile filters exist in the onboarding flow, backed by real data (buyer→district mapping, quartile buckets computed server-side). Contractor license tier and document cost aren't in any source data we have — would need a new source, not just a UI filter.
+- [ ] "New since your last visit" indicator on the open-tenders feed — a badge/count of how many new listings were added since the user last checked
+  — Builds directly on the already-shipped `open_tenders` table (`first_seen` date already stored per tender). Needs a per-user "last visited" timestamp — natural extension of `user_scopes` (already server-side, per signed-in user) — anonymous visitors would need a localStorage-based fallback timestamp instead.
 
 ## Tier 1 — Wedge (differentiation — nobody in the matrix does these)
 - [~] Real fit-scoring against company profile (past bids/wins, licenses, sector) — replaces keyword "smart agent" matching
@@ -26,6 +28,8 @@ this — worth resolving before treating competitor-claim items as settled fact)
 - [ ] AI eligibility-checklist + deadline extraction from tender documents
   — Deadline *extraction* for open tenders is done (`submit_start`/`submit_end` scraped directly from mr.gov.il's real detail pages). Document-level eligibility-checklist parsing is not.
 - [ ] Automated first-draft bid sections (compliance/qualification boilerplate) — targets the Yfat Radar / Govo consultant / Maagarim add-on revenue line
+- [ ] For subscribed users: approximate cost to bid per tender (document-purchase fee + any required bid guarantee/deposit) — real submission-associated costs, not the contract value itself
+  — Not yet verified whether mr.gov.il's tender detail pages expose this at all (we only confirmed title, buyer, and submission dates so far — see `scrape_open_tenders.py`). Needs the same discipline as everything else scraped this session: check real detail pages for a document-cost/guarantee field before assuming it's extractable, rather than building UI against an assumed field.
 
 ## Tier 2 — Stickiness & team expansion
 - [ ] Pipeline/kanban tracking (watching → preparing → submitted → won/lost)
