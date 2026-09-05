@@ -106,6 +106,40 @@ h1{font-size:1.85rem; margin-bottom:8px}
 .lightbox-card{max-width:720px; text-align:start}
 .lightbox-card .section-label{margin-bottom:16px}
 
+/* scope bar — persistent summary of the onboarding selection */
+.scope-bar{
+  display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:12px 18px;
+  margin-bottom:28px;
+}
+.scope-label{font-size:.88rem; color:var(--ink-soft)}
+.scope-label b{color:var(--ink)}
+
+/* onboarding modal */
+.onboarding-card{max-width:560px; text-align:start}
+.onboarding-step{margin-bottom:26px}
+.onboarding-step:last-of-type{margin-bottom:20px}
+.onboarding-step .section-label{text-align:start}
+.domain-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+.domain-card{
+  border:1.5px solid var(--line); background:var(--paper); color:var(--ink); font-family:inherit;
+  font-weight:700; font-size:.94rem; padding:14px; border-radius:10px; cursor:pointer; text-align:center;
+}
+.domain-card:hover{border-color:var(--accent)}
+.domain-card.selected{border-color:var(--accent); background:var(--accent-soft); color:var(--accent)}
+.onboarding-row{margin-bottom:10px}
+.onboarding-check{
+  display:inline-flex; align-items:center; gap:7px; font-size:.88rem; color:var(--ink);
+  cursor:pointer; padding:6px 4px;
+}
+.region-grid{display:grid; grid-template-columns:1fr 1fr; gap:2px 12px}
+.dealsize-grid{display:flex; flex-direction:column; gap:2px}
+.onboarding-submit{
+  width:100%; border:0; background:var(--accent); color:#fff; font-family:inherit; font-weight:700;
+  font-size:.98rem; padding:14px; border-radius:10px; cursor:pointer;
+}
+.onboarding-submit:hover{opacity:.92}
+
 /* empty state examples */
 .examples{display:flex; gap:8px; flex-wrap:wrap; margin-top:14px}
 .example-chip{

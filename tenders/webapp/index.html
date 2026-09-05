@@ -11,15 +11,42 @@
 
 <header>
   <h1>גלו את ההזדמנות הממשלתית הבאה שלכם — לפני שהיא הופכת למכרז פומבי</h1>
-  <p class="tagline">הזינו שם של כל חברת ניקיון או אחזקה שמתמודדת מול המגזר הממשלתי, ונציג את הפרופיל הציבורי שלה — כולל סימנים מוקדמים שמעידים על הזדמנות שעוד לא פורסמה כמכרז. ככה גם אתם יכולים להגיע ראשונים. פרטי הזיהוי המלאים זמינים בהתחברות חינמית.</p>
+  <p class="tagline">הזינו שם של כל חברה שמתמודדת מול המגזר הממשלתי, ונציג את הפרופיל הציבורי שלה — כולל סימנים מוקדמים שמעידים על הזדמנות שעוד לא פורסמה כמכרז. ככה גם אתם יכולים להגיע ראשונים. פרטי הזיהוי המלאים זמינים בהתחברות חינמית.</p>
 </header>
+
+<div id="scope-bar" class="scope-bar" hidden>
+  <span class="scope-label">מציגים: <b id="scope-summary"></b></span>
+  <button id="scope-change" class="icon-btn">שנו סינון</button>
+</div>
+
+<div id="onboarding-modal" class="modal-overlay" hidden>
+  <div class="modal-card onboarding-card">
+    <button id="onboarding-close" class="modal-close" aria-label="סגירה">✕</button>
+    <div class="onboarding-step" data-step="domain">
+      <div class="section-label">באיזה תחום אתם עובדים מול המגזר הממשלתי?</div>
+      <div class="domain-grid" id="domain-grid"></div>
+    </div>
+    <div class="onboarding-step" data-step="location">
+      <div class="section-label">איפה אתם מחפשים הזדמנויות?</div>
+      <div class="onboarding-row">
+        <label class="onboarding-check"><input type="checkbox" id="loc-national" checked><span>כל הארץ / גופים ארציים</span></label>
+      </div>
+      <div class="region-grid" id="region-grid"></div>
+    </div>
+    <div class="onboarding-step" data-step="dealsize">
+      <div class="section-label">אילו גדלי עסקה מעניינים אתכם?</div>
+      <div class="dealsize-grid" id="dealsize-grid"></div>
+    </div>
+    <button id="onboarding-submit" class="onboarding-submit">הראו לי הזדמנויות</button>
+  </div>
+</div>
 
 <div class="search-wrap">
   <div class="search-box">
     <input id="q" type="text" placeholder="שם חברה או ח.פ׳..." autocomplete="off">
     <button id="go">חפשו</button>
   </div>
-  <div class="search-hint">המאגר מכסה כרגע חברות עם רישומי ניקיון/אחזקה פומביים שזיהינו אוטומטית — לא כל חברה תימצא.</div>
+  <div class="search-hint" id="search-hint">המאגר מכסה כרגע חברות עם רישומים פומביים שזיהינו אוטומטית — לא כל חברה תימצא.</div>
   <div id="suggest" class="suggest" hidden></div>
 </div>
 
@@ -69,7 +96,7 @@
 
 <div id="nomatch" hidden>
   <div class="nomatch">
-    <p><strong>לא מצאנו רישום תחת השם הזה במאגר שלנו כרגע.</strong> זה מבוסס על סינון שמרני (המונח "ניקיון" ברישומי פטורים ממכרז) — זה לא אומר שלחברה הזו אין היסטוריה ציבורית, רק שעדיין לא זיהינו אותה אוטומטית. נשמח לבדוק ידנית.</p>
+    <p><strong>לא מצאנו רישום תחת השם הזה במאגר שלנו כרגע, בתחום שנבחר.</strong> זה מבוסס על סינון שמרני של רישומי פטורים ממכרז — זה לא אומר שלחברה הזו אין היסטוריה ציבורית, רק שעדיין לא זיהינו אותה אוטומטית (או שהיא בתחום אחר). נשמח לבדוק ידנית.</p>
     <div class="leave-info">
       <input id="nm-name" type="text" placeholder="שם החברה">
       <input id="nm-contact" type="text" placeholder="טלפון או אימייל">

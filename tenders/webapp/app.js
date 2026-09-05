@@ -11,8 +11,8 @@ const PROMO_PCT = 30;
 function promoDaysLeft(){ return Math.max(0, Math.ceil((PROMO_DEADLINE - TODAY) / 86400000)); }
 function promoPrice(regular){ return Math.round(regular * (1 - PROMO_PCT/100) / 10) * 10; }
 const PLANS = [
-  { key: 'single', name: 'מנוי קטגוריה בודדת', desc: 'מעקב רציף אחרי קטגוריית הניקיון בלבד', regular: 690 },
-  { key: 'multi', name: 'מנוי רב-קטגורי', desc: 'ניקיון + אחזקת מבנים ומתקנים', regular: 1490 },
+  { key: 'single', name: 'מנוי קטגוריה בודדת', desc: 'מעקב רציף אחרי הקטגוריה שבחרתם בלבד', regular: 690 },
+  { key: 'multi', name: 'מנוי רב-קטגורי', desc: 'מעקב על פני כל 6 הקטגוריות הזמינות', regular: 1490 },
 ];
 
 const TIERS = [
@@ -22,6 +22,54 @@ const TIERS = [
 ];
 function tierOfFull(c){ return TIERS.find(t => t.test(c)); }
 const TIER_LABELS = { leading: 'שחקן מוביל', established: 'שחקן יציב', rising: 'כוח עולה' };
+
+// ---------- onboarding scope: domain / location / deal-size ----------
+// All 6 are real, validated, live domains (see the multi-domain expansion plan) — every one
+// of these is actually queryable in Supabase, not a "coming soon" placeholder.
+const DOMAINS = [
+  { key: 'cleaning', label: 'ניקיון' },
+  { key: 'security', label: 'שמירה ואבטחה' },
+  { key: 'catering', label: 'הסעדה וכיבוד' },
+  { key: 'gardening', label: 'גינון' },
+  { key: 'laundry', label: 'כביסה' },
+  { key: 'transport', label: 'הסעות' },
+];
+const DISTRICTS = ['ירושלים', 'תל אביב', 'מרכז', 'חיפה', 'צפון', 'דרום', 'יהודה ושומרון'];
+const DEALSIZE_OPTIONS = [
+  { bucket: 1, label: 'עסקאות קטנות' },
+  { bucket: 2, label: 'עסקאות בינוניות' },
+  { bucket: 3, label: 'עסקאות גדולות' },
+  { bucket: 4, label: 'עסקאות גדולות מאוד' },
+];
+const DEFAULT_SCOPE = { category: 'cleaning', districts: [], includeNational: true, dealSizes: [1,2,3,4] };
+
+function loadScope(){
+  try {
+    const raw = localStorage.getItem('ti_scope');
+    if (!raw) return null;
+    const s = JSON.parse(raw);
+    return { ...DEFAULT_SCOPE, ...s };
+  } catch(e) { return null; }
+}
+function saveScope(scope){ try { localStorage.setItem('ti_scope', JSON.stringify(scope)); } catch(e) {} }
+
+let SCOPE = loadScope();
+function currentCategory(){ return (SCOPE || DEFAULT_SCOPE).category; }
+
+// applies the location + deal-size portion of SCOPE to a set of teaser rows (client-side —
+// the category filter itself already happened server-side via the query). Full-mode rows
+// don't get filtered here since a signed-in company profile view should show its real data
+// regardless of the visitor's own scope preferences.
+function applyScope(rows, mode){
+  if (mode !== 'teaser' || !SCOPE) return rows;
+  return rows.filter(c => {
+    const districtOk = SCOPE.districts.length === 0
+      || (c.regions || []).some(r => SCOPE.districts.includes(r))
+      || (SCOPE.includeNational && c.has_national_buyer);
+    const dealOk = !c.dealsize_bucket || SCOPE.dealSizes.length === 0 || SCOPE.dealSizes.includes(c.dealsize_bucket);
+    return districtOk && dealOk;
+  });
+}
 
 let NAME_INDEX = [];
 let session = null; // supabase session, null = anonymous
@@ -71,7 +119,8 @@ function score(query, entry){
 }
 function search(query){
   if (!query || query.trim().length < 2) return [];
-  return NAME_INDEX.map(c => ({ c, s: score(query, { norms: c.names.map(normalize), idNorm: c.id }) }))
+  return NAME_INDEX.filter(c => c.category === currentCategory())
+    .map(c => ({ c, s: score(query, { norms: c.names.map(normalize), idNorm: c.id }) }))
     .filter(x => x.s > 20)
     .sort((a,b) => b.s - a.s)
     .slice(0, 6);
@@ -83,34 +132,33 @@ let SHOWCASE = []; // anonymized "see the full value" examples — always render
 
 // Every query is scoped to a domain — the `companies` table holds one row per (company,
 // category) pair, since a company can be active in one domain and in a renewal gap in
-// another. CURRENT_CATEGORY defaults to 'cleaning' until the onboarding domain-selector
-// (queued separately) lets a visitor actually choose.
-const CURRENT_CATEGORY = 'cleaning';
+// another. currentCategory() reads the onboarding-selected domain (defaults to 'cleaning'
+// until a visitor picks one).
 
 async function fetchCompany(id){
   const demo = SHOWCASE.find(d => d.id === id);
   if (demo) return { mode: 'full', data: demo, isShowcase: true };
   if (session){
-    const { data, error } = await sb.from('companies').select('*').eq('id', id).eq('category', CURRENT_CATEGORY).maybeSingle();
+    const { data, error } = await sb.from('companies').select('*').eq('id', id).eq('category', currentCategory()).maybeSingle();
     if (error) throw error;
     return { mode: 'full', data };
   }
-  const { data, error } = await sb.from('companies_teaser').select('*').eq('id', id).eq('category', CURRENT_CATEGORY).maybeSingle();
+  const { data, error } = await sb.from('companies_teaser').select('*').eq('id', id).eq('category', currentCategory()).maybeSingle();
   if (error) throw error;
   return { mode: 'teaser', data };
 }
 async function fetchAll(){
   if (session){
-    const { data, error } = await sb.from('companies').select('*').eq('category', CURRENT_CATEGORY);
+    const { data, error } = await sb.from('companies').select('*').eq('category', currentCategory());
     if (error) throw error;
     return { mode: 'full', data: data || [] };
   }
-  const { data, error } = await sb.from('companies_teaser').select('*').eq('category', CURRENT_CATEGORY);
+  const { data, error } = await sb.from('companies_teaser').select('*').eq('category', currentCategory());
   if (error) throw error;
-  return { mode: 'teaser', data: data || [] };
+  return { mode: 'teaser', data: applyScope(data || [], 'teaser') };
 }
 async function fetchMarketStats(){
-  const { data, error } = await sb.from('market_stats').select('*').eq('category', CURRENT_CATEGORY).maybeSingle();
+  const { data, error } = await sb.from('market_stats').select('*').eq('category', currentCategory()).maybeSingle();
   if (error || !data) return { total: NAME_INDEX.length, active: 0, buyers: 0 };
   return data;
 }
@@ -215,15 +263,17 @@ function median(arr){
   const m = Math.floor(s.length/2);
   return s.length % 2 ? s[m] : (s[m-1] + s[m]) / 2;
 }
-function companyCleaningStatsFull(c){
+function companyDomainStatsFull(c){
+  // No title keyword filter here — c.records is already scoped to the row's own category by
+  // the generator (src/lifecycle/gen_company_dataset.py), same reasoning as the SQL teaser
+  // view. A hardcoded 'ניקיון' filter here would silently zero out every non-cleaning domain.
   const MIN_PLAUSIBLE_AMOUNT = 1000;
-  const cleaningRecords = c.records.filter(r => r.title && r.title.includes('ניקיון'));
-  const amounts = cleaningRecords
+  const amounts = c.records
     .map(r => parseFloat(r.amount))
     .filter(n => !isNaN(n) && n >= MIN_PLAUSIBLE_AMOUNT);
-  if (!cleaningRecords.length || !amounts.length) return null;
+  if (!c.records.length || !amounts.length) return null;
   return {
-    id: c.id, name: c.names[0], volume: cleaningRecords.length, dealSize: median(amounts),
+    id: c.id, name: c.names[0], volume: c.records.length, dealSize: median(amounts),
     years: TODAY.getFullYear() - c.year_min + 1, buyerCount: c.buyers.length, tier: tierOfFull(c).label,
   };
 }
@@ -231,7 +281,7 @@ function hashStr(s){ let h = 0; for (let i=0;i<s.length;i++) h = (h*31 + s.charC
 
 function renderQuadrant(mode, all, highlightId){
   if (mode === 'full'){
-    const QUADRANT_DATA = all.map(companyCleaningStatsFull).filter(Boolean);
+    const QUADRANT_DATA = all.map(companyDomainStatsFull).filter(Boolean);
     if (!QUADRANT_DATA.length) return `<div class="note">אין עדיין מספיק נתונים להצגת מפת שחקנים.</div>`;
     const highlighted = QUADRANT_DATA.find(d => d.id === highlightId);
     const Q_X_MAX = Math.max(...QUADRANT_DATA.map(d => d.volume));
@@ -270,7 +320,7 @@ function renderQuadrant(mode, all, highlightId){
           <span><i class="sw" style="background:var(--accent)"></i>חברה בתחום</span>
           ${highlightId ? '<span><i class="sw" style="background:var(--accent2)"></i>החברה שהוצגה</span>' : ''}
         </div>
-        <div class="quad-caption">מיקום מבוסס על כל הרישומים הציבוריים בעלי כותרת "ניקיון". ${QUADRANT_DATA.length} חברות מוצגות. ציר גודל העסקה בסקאלה לוגריתמית.</div>
+        <div class="quad-caption">מיקום מבוסס על כל הרישומים הציבוריים בתחום שנבחר. ${QUADRANT_DATA.length} חברות מוצגות. ציר גודל העסקה בסקאלה לוגריתמית.</div>
         ${highlightId && !highlighted ? `<div class="note">לא נמצא מספיק נתוני עסקאות בעלות סכום תקף כדי למקם חברה זו בתרשים.</div>` : ''}
       </div>`;
   }
@@ -449,7 +499,7 @@ async function renderReport(id){
     <div class="stat-strip">
       <div class="stat stat-clickable" data-action="open-quadrant-lightbox"><b class="ltr">${stats.active}</b><span>חברות עם התקשרות פעילה כרגע</span></div>
       <div class="stat stat-clickable" data-action="open-quadrant-lightbox"><b class="ltr">${stats.buyers}</b><span>גורמים ממשלתיים שונים במעקב</span></div>
-      <div class="stat stat-clickable" data-action="open-quadrant-lightbox"><b class="ltr">${stats.total}</b><span>חברות ניקיון/אחזקה שזוהו במאגר</span></div>
+      <div class="stat stat-clickable" data-action="open-quadrant-lightbox"><b class="ltr">${stats.total}</b><span>חברות ${(DOMAINS.find(d => d.key === currentCategory()) || {}).label || ''} שזוהו במאגר</span></div>
     </div>
     <section>
       <div class="section-label">הזדמנויות שאנחנו עוקבים אחריהן עכשיו</div>
@@ -500,6 +550,7 @@ async function renderReport(id){
   document.getElementById('btn-share').onclick = async () => {
     const url = new URL(location.href);
     url.searchParams.set('c', c.id);
+    url.searchParams.set('cat', currentCategory());
     const shareData = { title: `תדרוך ${nameMain}`, text: `תדרוך מודיעין ציבורי עבור ${nameMain}`, url: url.toString() };
     try { if (navigator.share) await navigator.share(shareData); else { await navigator.clipboard.writeText(url.toString()); alert('הקישור הועתק'); } } catch(e) {}
   };
@@ -623,7 +674,8 @@ async function renderEmptyState(){
   ).join('');
   [...document.querySelectorAll('.showcase-chip')].forEach(btn => { btn.onclick = () => showCompany(btn.dataset.id, btn.dataset.name); });
 
-  const active = NAME_INDEX.filter(c => c.is_active);
+  const inScope = NAME_INDEX.filter(c => c.category === currentCategory());
+  const active = inScope.filter(c => c.is_active);
   const pool = active.filter(c => c.expiring_soon).length >= 5 ? active.filter(c => c.expiring_soon) : active;
   const shown = [];
   const copy = [...pool];
@@ -631,11 +683,12 @@ async function renderEmptyState(){
   document.getElementById('examples').innerHTML = shown.map(c => `<button class="example-chip" data-id="${c.id}" data-name="${c.names[0]}">${c.names[0]}</button>`).join('');
   [...document.querySelectorAll('.example-chip')].forEach(btn => { btn.onclick = () => showCompany(btn.dataset.id, btn.dataset.name); });
 
-  let stats; try { stats = await fetchMarketStats(); } catch(e) { stats = { total: NAME_INDEX.length, active: '—', buyers: '—' }; }
+  let stats; try { stats = await fetchMarketStats(); } catch(e) { stats = { total: inScope.length, active: '—', buyers: '—' }; }
+  const domainLabel = (DOMAINS.find(d => d.key === currentCategory()) || {}).label || '';
   document.getElementById('empty-stats').innerHTML = `
     <div class="stat stat-clickable" data-action="open-quadrant-lightbox"><b class="ltr">${stats.active}</b><span>חברות עם התקשרות פעילה כרגע</span></div>
     <div class="stat stat-clickable" data-action="open-quadrant-lightbox"><b class="ltr">${stats.buyers}</b><span>גורמים ממשלתיים שונים במעקב</span></div>
-    <div class="stat stat-clickable" data-action="open-quadrant-lightbox"><b class="ltr">${stats.total}</b><span>חברות ניקיון/אחזקה שזוהו במאגר</span></div>`;
+    <div class="stat stat-clickable" data-action="open-quadrant-lightbox"><b class="ltr">${stats.total}</b><span>חברות ${domainLabel} שזוהו במאגר</span></div>`;
 
   let allRes; try { allRes = await fetchAll(); } catch(e) { allRes = { mode: 'teaser', data: [] }; }
   document.getElementById('empty-opps').innerHTML = renderOpportunities(allRes.mode, allRes.data, null);
@@ -658,6 +711,86 @@ function wireQuadrantLightbox(container, mode, all, highlightId){
   [...container.querySelectorAll('[data-action="open-quadrant-lightbox"]')].forEach(el => {
     el.onclick = () => openQuadrantLightbox(mode, all, highlightId);
   });
+}
+
+// ---------- onboarding UI ----------
+// local, uncommitted selection state while the onboarding modal is open — copied into SCOPE
+// (and persisted) only on submit, so closing without submitting doesn't half-apply a change.
+let draft = null;
+
+function renderOnboardingContent(){
+  document.getElementById('domain-grid').innerHTML = DOMAINS.map(d =>
+    `<button type="button" class="domain-card" data-key="${d.key}">${d.label}</button>`
+  ).join('');
+  document.getElementById('region-grid').innerHTML = DISTRICTS.map(r =>
+    `<label class="onboarding-check"><input type="checkbox" value="${r}"><span>${r}</span></label>`
+  ).join('');
+  document.getElementById('dealsize-grid').innerHTML = DEALSIZE_OPTIONS.map(o =>
+    `<label class="onboarding-check"><input type="checkbox" value="${o.bucket}" checked><span>${o.label}</span></label>`
+  ).join('');
+}
+
+function syncOnboardingFromDraft(){
+  [...document.querySelectorAll('#domain-grid .domain-card')].forEach(el => {
+    el.classList.toggle('selected', el.dataset.key === draft.category);
+  });
+  [...document.querySelectorAll('#region-grid input')].forEach(el => {
+    el.checked = draft.districts.includes(el.value);
+  });
+  document.getElementById('loc-national').checked = draft.includeNational;
+  [...document.querySelectorAll('#dealsize-grid input')].forEach(el => {
+    el.checked = draft.dealSizes.includes(parseInt(el.value, 10));
+  });
+}
+
+function openOnboarding(){
+  draft = { ...(SCOPE || DEFAULT_SCOPE) };
+  syncOnboardingFromDraft();
+  document.getElementById('onboarding-modal').hidden = false;
+}
+function closeOnboarding(){
+  document.getElementById('onboarding-modal').hidden = true;
+}
+
+function scopeSummaryText(){
+  const s = SCOPE || DEFAULT_SCOPE;
+  const domainLabel = (DOMAINS.find(d => d.key === s.category) || {}).label || s.category;
+  const locBits = [];
+  if (s.includeNational) locBits.push('ארצי');
+  if (s.districts.length) locBits.push(...s.districts);
+  const locText = locBits.length ? locBits.join(', ') : 'כל הארץ';
+  return `${domainLabel} · ${locText}`;
+}
+function renderScopeBar(){
+  document.getElementById('scope-bar').hidden = false;
+  document.getElementById('scope-summary').textContent = scopeSummaryText();
+}
+
+function wireOnboarding(){
+  renderOnboardingContent();
+  document.getElementById('domain-grid').addEventListener('click', e => {
+    const btn = e.target.closest('.domain-card');
+    if (!btn) return;
+    draft.category = btn.dataset.key;
+    syncOnboardingFromDraft();
+  });
+  document.getElementById('onboarding-close').onclick = closeOnboarding;
+  document.getElementById('onboarding-modal').addEventListener('click', e => { if (e.target.id === 'onboarding-modal') closeOnboarding(); });
+  document.getElementById('onboarding-submit').onclick = () => {
+    draft.includeNational = document.getElementById('loc-national').checked;
+    draft.districts = [...document.querySelectorAll('#region-grid input:checked')].map(el => el.value);
+    draft.dealSizes = [...document.querySelectorAll('#dealsize-grid input:checked')].map(el => parseInt(el.value, 10));
+    SCOPE = draft;
+    saveScope(SCOPE);
+    closeOnboarding();
+    renderScopeBar();
+    currentReportId = null;
+    document.getElementById('report').hidden = true;
+    document.getElementById('nomatch').hidden = true;
+    document.getElementById('q').value = '';
+    renderEmptyState();
+  };
+  document.getElementById('scope-change').onclick = openOnboarding;
 }
 
 // ---------- init ----------
@@ -689,12 +822,27 @@ async function init(){
     document.getElementById('nm-thanks').hidden = false;
   };
 
+  wireOnboarding();
+
   const params = new URLSearchParams(location.search);
   const preId = params.get('c');
+  const preCat = params.get('cat');
+
   if (preId){
-    const entry = NAME_INDEX.find(x => x.id === preId);
+    // a shared link carries its own category — honor it even if the visitor has a different
+    // stored scope, defaulting the rest of that scope to sane values if this is a first visit.
+    if (preCat){
+      SCOPE = { ...(SCOPE || DEFAULT_SCOPE), category: preCat };
+      saveScope(SCOPE);
+    }
+    renderScopeBar();
+    const entry = NAME_INDEX.find(x => x.id === preId && x.category === currentCategory());
     showCompany(preId, entry ? entry.names[0] : '');
+  } else if (!SCOPE){
+    openOnboarding();
+    renderEmptyState(); // empty state renders under the modal so it's ready once they submit
   } else {
+    renderScopeBar();
     renderEmptyState();
   }
 }

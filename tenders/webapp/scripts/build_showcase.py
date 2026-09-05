@@ -31,14 +31,14 @@ SOURCES = [
         # gap_flag, richest example (full_count=54, 15 buyers) after the title-only classifier fix
         "real_id": "511412041",
         "demo_id": "DEMO-1",
-        "demo_name": "חברת ניקיון לדוגמה — אלפא בע\"מ",
+        "demo_name": "חברה לדוגמה — אלפא בע\"מ",
         "buyer_map_prefix": "גורם מזמין לדוגמה",
     },
     {
         # short_ext_flag, richest example (full_count=14, 8 buyers) after the classifier fix
         "real_id": "513283838",
         "demo_id": "DEMO-2",
-        "demo_name": "חברת ניקיון לדוגמה — בטא בע\"מ",
+        "demo_name": "חברה לדוגמה — בטא בע\"מ",
         "buyer_map_prefix": "גורם מזמין לדוגמה",
     },
     {
@@ -46,7 +46,7 @@ SOURCES = [
         # the fix even though its final_option_flag no longer applies post-correction
         "real_id": "512370693",
         "demo_id": "DEMO-3",
-        "demo_name": "חברת ניקיון לדוגמה — גמא בע\"מ",
+        "demo_name": "חברה לדוגמה — גמא בע\"מ",
         "buyer_map_prefix": "גורם מזמין לדוגמה",
     },
 ]
@@ -64,7 +64,7 @@ def anonymize(c, spec):
         records.append({
             "proc_id": f"DEMO-{len(records)+1}",
             "buyer": fake_buyer(r["buyer"]) if r.get("buyer") else None,
-            "title": "שירותי ניקיון (כותרת לדוגמה, מבוססת על רישום אמיתי)",
+            "title": "שירותים (כותרת לדוגמה, מבוססת על רישום אמיתי)",
             "mechanism": r.get("mechanism"),
             "pub_date_obj": r.get("pub_date_obj"),
             "start_obj": r.get("start_obj"),

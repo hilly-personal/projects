@@ -8,6 +8,14 @@
 #   'משוער' (approximate — inferred from a known HQ, not stated in the record itself).
 # National bodies get no district, honestly, rather than a guess.
 REGIONS = {
+    # Added when extending region coverage from cleaning-only to all 6 validated domains —
+    # these 5 buyers didn't appear in the original cleaning-only buyer set.
+    'רשות לשרותים צבוריים חשמל': {'national': True, 'src': 'רשות החשמל — גוף רגולטורי ארצי'},
+    'מר"ג דורות': {'region': 'מרכז', 'certainty': 'משוער', 'src': 'מרכז רפואי גריאטרי דורות, נתניה'},
+    'נתיב': {'national': True, 'src': 'הלשכה לקשרי תפוצות (נתיב), משרד רה"מ — גוף ארצי'},
+    'המרכז הרפואי לגליל': {'region': 'צפון', 'certainty': 'ודאי', 'src': 'בית חולים גליל, נהריה'},
+    "חדשנות, מדע וטכנול'": {'national': True, 'src': 'משרד החדשנות, המדע והטכנולוגיה — גוף ארצי'},
+
     'האוצר-זכויות ניצולי השואה': {'national': True, 'src': 'יחידה במשרד האוצר — גוף ארצי'},
     'הלשכה המרכזית לסטטיסטיקה': {'national': True, 'src': 'גוף ארצי — פועל בכל הארץ'},
     'המרכז הרפואי ע"ש ברזילי': {'region': 'דרום', 'certainty': 'ודאי', 'src': 'בית חולים ברזילי, אשקלון'},
